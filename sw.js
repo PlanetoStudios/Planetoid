@@ -1,4 +1,4 @@
-const CACHE_NAME = 'planetoid-v2';
+const CACHE_NAME = 'planetoid-v3';
 const assets = [
   '/',
   '/index.html',
