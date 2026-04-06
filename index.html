@@ -3,71 +3,149 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Planetoid | No-Storage Edition</title>
+    <title>Planetoid | Admin Empire</title>
+    <link rel="manifest" href="manifest.json">
     <style>
-        /* Mantendo o seu estilo galáctico */
-        body { margin: 0; background-color: #050505; color: #f0f0f0; font-family: 'Courier New', monospace; display: flex; flex-direction: column; align-items: center; min-height: 100vh; background-image: radial-gradient(1px 1px at 20px 30px, #eee, rgba(0,0,0,0)), radial-gradient(100px 150px at 50% 50%, #1a0033, #050505); }
-        header { padding: 30px; text-align: center; }
-        h1 { font-size: 3rem; color: #00ffcc; text-shadow: 3px 3px #b800ff; margin: 0; }
-        #auth-screen { display: flex; flex-direction: column; gap: 15px; width: 300px; margin-top: 50px; }
+        :root { --neon: #00ffcc; --purple: #b800ff; --bg: #050505; --card: #111; }
+        body {
+            margin: 0; background: var(--bg); color: #f0f0f0;
+            font-family: 'Courier New', monospace; min-height: 100vh;
+            background-image: radial-gradient(1px 1px at 20px 30px, #eee, rgba(0,0,0,0)), 
+                              radial-gradient(100px 150px at 50% 50%, #1a0033, #050505);
+            display: flex; flex-direction: column; align-items: center;
+        }
+        header { padding: 20px; text-align: center; }
+        h1 { font-size: 3.5rem; color: var(--neon); text-shadow: 4px 4px var(--purple); margin: 0; letter-spacing: 5px; }
+
+        /* NAVEGAÇÃO */
+        .nav-bar { width: 95%; max-width: 1200px; display: flex; justify-content: space-between; align-items: center; padding: 10px; background: rgba(255,255,255,0.05); border-radius: 10px; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
+        .user-pill { display: flex; align-items: center; gap: 10px; cursor: pointer; padding: 5px 15px; border: 1px solid var(--purple); border-radius: 20px; background: #000; }
+        .avatar-small { width: 30px; height: 30px; border-radius: 50%; object-fit: cover; background: #333; border: 1px solid var(--neon); }
+
         #main-hub { display: none; width: 100%; flex-direction: column; align-items: center; }
-        .controls { margin-bottom: 40px; display: flex; gap: 10px; }
-        .btn { background: #b800ff; color: white; border: 4px solid #7a00aa; padding: 10px 15px; cursor: pointer; font-weight: bold; font-family: inherit; }
-        .btn:hover { background: #00ffcc; color: #000; border-color: #00ccaa; }
-        #game-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 25px; width: 90%; max-width: 1200px; padding: 20px; }
-        .game-card { background: #111; border: 3px solid #333; overflow: hidden; position: relative; transition: 0.3s; }
-        .game-banner { width: 100%; height: 150px; object-fit: cover; background: #222; }
-        .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); }
-        .modal-content { background: #1a1a1a; margin: 2% auto; padding: 30px; border: 5px solid #00ffcc; width: 90%; max-width: 600px; }
-        input, textarea { width: 100%; padding: 12px; background: #000; color: #00ffcc; border: 2px solid #333; margin-bottom: 10px; box-sizing: border-box; }
-        #imgPreview { width: 100%; height: 120px; object-fit: cover; border: 2px solid #333; display: none; margin-bottom: 10px; }
-        #game-player { width: 100%; height: 500px; border: none; background: #fff; }
+        
+        .btn {
+            background: var(--purple); color: white; border: 3px solid #7a00aa;
+            padding: 10px 20px; cursor: pointer; font-weight: bold; font-family: inherit; transition: 0.2s;
+        }
+        .btn:hover { background: var(--neon); color: #000; border-color: #00ccaa; box-shadow: 0 0 15px var(--neon); }
+
+        /* GRID E CARDS */
+        #game-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 25px; width: 95%; max-width: 1200px; padding: 20px; }
+        .game-card { background: var(--card); border: 2px solid #333; position: relative; transition: 0.3s; border-radius: 8px; overflow: hidden; }
+        .game-banner { width: 100%; height: 180px; object-fit: cover; background: #222; }
+        .card-body { padding: 15px; }
+        
+        /* COMENTÁRIOS */
+        .comment-section { margin-top: 20px; background: #000; padding: 15px; border: 1px solid #222; max-height: 200px; overflow-y: auto; text-align: left; }
+        .comment-item { font-size: 0.8rem; margin-bottom: 10px; border-bottom: 1px solid #111; padding-bottom: 5px; }
+        .comment-item b { color: var(--neon); }
+
+        /* MODAIS */
+        .modal { display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); overflow-y: auto; }
+        .modal-content { background: #0a0a0a; margin: 2% auto; padding: 30px; border: 3px solid var(--neon); width: 90%; max-width: 750px; position: relative; text-align: center; }
+        
+        input, textarea, select { width: 100%; padding: 12px; background: #000; color: var(--neon); border: 2px solid #333; margin-bottom: 15px; font-family: inherit; box-sizing: border-box; }
+        .preview-img { width: 100%; height: 180px; object-fit: cover; border: 1px solid var(--purple); margin-bottom: 10px; display: none; margin-left: auto; margin-right: auto; }
+
+        /* RANKING */
+        .rank-table { width: 100%; border-collapse: collapse; margin-top: 10px; text-align: left; }
+        .rank-table td { padding: 12px; border-bottom: 1px solid #222; }
+        .rank-gold { color: gold; font-weight: bold; text-shadow: 0 0 5px gold; }
     </style>
 </head>
 <body>
 
     <header><h1>PLANETOID</h1></header>
 
-    <div id="auth-screen">
-        <input type="text" id="authUser" placeholder="Comandante">
-        <input type="password" id="authPass" placeholder="Senha">
-        <button class="btn" onclick="handleAuth('login')">ENTRAR</button>
-        <button class="btn" style="background:#00d4ff" onclick="handleAuth('signup')">CRIAR CONTA</button>
-        <p id="authMsg" style="color: #ff4757; text-align: center;"></p>
+    <div id="auth-screen" style="width:320px; margin-top:40px;">
+        <h3 style="text-align:center; color:var(--purple)">SISTEMA DE ACESSO</h3>
+        <input type="text" id="authUser" placeholder="USUÁRIO">
+        <input type="password" id="authPass" placeholder="SENHA">
+        <button class="btn" style="width:100%" onclick="handleAuth('login')">ACESSAR HUB</button>
+        <button class="btn" style="width:100%; background:#00d4ff; margin-top:10px; border-color:#008fb3" onclick="handleAuth('signup')">CRIAR CONTA</button>
+        <p id="authMsg" style="color:red; font-size:0.8rem; text-align:center"></p>
     </div>
 
     <div id="main-hub">
-        <div class="controls">
-            <button class="btn" onclick="prepareUpload()">[+] NOVO JOGO</button>
-            <button class="btn" style="background:#ff4757" onclick="logout()">SAIR</button>
+        <div class="nav-bar">
+            <div class="user-pill" onclick="openModal('profileModal')">
+                <img id="myAvatar" class="avatar-small" src="https://placehold.co/100/333/00ffcc?text=?">
+                <span id="myName">...</span>
+            </div>
+            <button class="btn" style="background:transparent; border:none; color:var(--neon)" onclick="openModal('rankModal')">🏆 RANKING</button>
+            <button class="btn" style="background:#ff4757; border-color:#aa0000" onclick="logout()">SAIR</button>
         </div>
+
+        <div style="width:90%; max-width:600px; margin-bottom: 20px;">
+            <input type="text" id="searchBox" placeholder="Buscar jogos, categorias ou autores..." oninput="filterGames()" style="margin:0">
+        </div>
+
+        <button class="btn" onclick="prepareUpload()">[+] LANÇAR NOVO JOGO</button>
         <div id="game-grid"></div>
     </div>
 
     <div id="uploadModal" class="modal">
         <div class="modal-content">
-            <h2 id="modalTitle">LANÇAR JOGO</h2>
+            <h2 id="modalTitle" style="color:var(--neon)">NOVA MISSÃO</h2>
             <input type="hidden" id="editGameId">
             <input type="text" id="gameName" placeholder="Nome do Jogo">
-            <label style="font-size: 0.7rem; color: #888;">CAPA DO DISPOSITIVO:</label>
-            <input type="file" id="gameLogoFile" accept="image/*" onchange="processImage(this)">
-            <img id="imgPreview">
-            <textarea id="gameCode" placeholder="Código HTML" rows="5"></textarea>
-            <button class="btn" id="saveBtn" onclick="saveGame()">GRAVAR NO BANCO</button>
-            <button class="btn" style="background:#444" onclick="closeModal('uploadModal')">CANCELAR</button>
+            <select id="gameCategory">
+                <option value="Ação">Ação</option>
+                <option value="Aventura">Aventura</option>
+                <option value="Clicker">Clicker</option>
+                <option value="Puzzle">Puzzle</option>
+                <option value="Estratégia">Estratégia</option>
+            </select>
+            <label style="font-size:0.7rem; color:#888; display:block; margin-bottom:5px;">CAPA DO JOGO (GALERIA):</label>
+            <input type="file" accept="image/*" onchange="optimizeImg(this, 'imgPreview')">
+            <img id="imgPreview" class="preview-img">
+            <textarea id="gameCode" placeholder="Cole o código HTML/JS do jogo aqui..." rows="8"></textarea>
+            <button class="btn" id="saveBtn" onclick="saveGame()">GRAVAR NOS SISTEMAS</button>
+            <button class="btn" style="background:#444; border-color:#222" onclick="closeModal('uploadModal')">CANCELAR</button>
+        </div>
+    </div>
+
+    <div id="profileModal" class="modal">
+        <div class="modal-content">
+            <h2 style="color:var(--purple)">MEU PERFIL</h2>
+            <input type="file" accept="image/*" onchange="optimizeImg(this, 'profilePreview')">
+            <img id="profilePreview" class="preview-img" style="display:block; width:120px; height:120px; border-radius:50%; margin: 10px auto;">
+            <button class="btn" onclick="saveProfile()">SALVAR AVATAR</button>
+            <button class="btn" style="background:#444" onclick="closeModal('profileModal')">FECHAR</button>
+        </div>
+    </div>
+
+    <div id="rankModal" class="modal">
+        <div class="modal-content">
+            <h2 style="color:gold">🏆 LÍDERES DA GALÁXIA</h2>
+            <div id="rankList"></div>
+            <button class="btn" style="margin-top:20px" onclick="closeModal('rankModal')">VOLTAR AO HUB</button>
         </div>
     </div>
 
     <div id="playerModal" class="modal">
-        <div class="modal-content" style="max-width: 90%;">
-            <span style="cursor:pointer; color:red; float:right" onclick="closeModal('playerModal')">[X]</span>
-            <iframe id="game-player"></iframe>
+        <div class="modal-content" style="max-width: 95%; width: 95%;">
+            <button class="btn" style="float:right; background:red; padding: 5px 12px;" onclick="closeModal('playerModal')">X</button>
+            <h2 id="playTitle" style="color:var(--neon); margin:0 0 10px 0; text-align: left;"></h2>
+            <button class="btn" style="font-size:0.7rem; padding:5px 10px; background:#333; margin-bottom:10px" onclick="toggleFS()">TELA CHEIA</button>
+            
+            <iframe id="player-frame"></iframe>
+            
+            <div class="comment-section">
+                <h4>💬 FEEDBACK DA TRIPULAÇÃO</h4>
+                <div id="commentList"></div>
+            </div>
+            <div style="display:flex; gap:10px; margin-top:10px;">
+                <input type="text" id="newComment" placeholder="Escreva um comentário..." style="margin:0">
+                <button class="btn" onclick="sendComment()">ENVIAR</button>
+            </div>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, push, set, onValue, get, child, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getDatabase, ref, push, set, onValue, get, child, remove, update, increment } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDeygtxefJrCt_nYA6MsoKG7bhj0Yzxgok",
@@ -80,7 +158,9 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
-        let currentBase64 = ""; // Aqui guardaremos o texto da imagem
+        let currentImg = "", currentProfileImg = "", activeGameId = "", allGames = [];
+
+        const isAdmin = () => localStorage.getItem('planetoid_user') === 'planetofc';
 
         // --- AUTH ---
         window.handleAuth = async (type) => {
@@ -88,47 +168,65 @@
             const pass = document.getElementById('authPass').value;
             if(!user || !pass) return;
             const snap = await get(child(ref(db), 'usuarios/' + user));
-            if(type === 'signup') {
-                if(snap.exists()) { document.getElementById('authMsg').innerText = "Já existe!"; }
-                else { await set(ref(db, 'usuarios/' + user), { password: pass }); loginSuccess(user); }
+            if(type === 'signup'){
+                if(snap.exists()) alert("Nome já cadastrado!");
+                else { await set(ref(db, 'usuarios/' + user), { password: pass, avatar: "" }); loginSuccess(user); }
             } else {
                 if(snap.exists() && snap.val().password === pass) loginSuccess(user);
-                else document.getElementById('authMsg').innerText = "Erro!";
+                else alert("Usuário ou senha incorretos!");
             }
         };
 
-        function loginSuccess(u) {
+        function loginSuccess(u){
             localStorage.setItem('planetoid_user', u);
             document.getElementById('auth-screen').style.display = 'none';
             document.getElementById('main-hub').style.display = 'flex';
+            document.getElementById('myName').innerText = u.toUpperCase();
+            onValue(ref(db, 'usuarios/' + u), (s) => {
+                if(s.val()?.avatar) {
+                    document.getElementById('myAvatar').src = s.val().avatar;
+                    document.getElementById('profilePreview').src = s.val().avatar;
+                }
+            });
             loadGames();
         }
-
         window.logout = () => { localStorage.removeItem('planetoid_user'); location.reload(); };
-        if(localStorage.getItem('planetoid_user')) loginSuccess(localStorage.getItem('planetoid_user'));
 
-        // --- LÓGICA DA IMAGEM (A MÁGICA) ---
-        window.processImage = (input) => {
+        // --- IMAGENS ---
+        window.optimizeImg = (input, targetId) => {
             const file = input.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    currentBase64 = e.target.result; // Transforma a foto em texto!
-                    const prev = document.getElementById('imgPreview');
-                    prev.src = currentBase64;
-                    prev.style.display = 'block';
+            if(!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const size = targetId === 'imgPreview' ? {w:400, h:225} : {w:120, h:120};
+                    canvas.width = size.w; canvas.height = size.h;
+                    canvas.getContext('2d').drawImage(img, 0, 0, size.w, size.h);
+                    const b64 = canvas.toDataURL('image/jpeg', 0.6);
+                    if(targetId === 'imgPreview') currentImg = b64; else currentProfileImg = b64;
+                    document.getElementById(targetId).src = b64; document.getElementById(targetId).style.display = 'block';
                 };
-                reader.readAsDataURL(file);
-            }
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
         };
 
-        // --- GAMES ---
+        window.saveProfile = () => {
+            update(ref(db, 'usuarios/' + localStorage.getItem('planetoid_user')), { avatar: currentProfileImg });
+            alert("Perfil atualizado!");
+            closeModal('profileModal');
+        };
+
+        // --- CORE GAMES ---
         window.prepareUpload = () => {
             document.getElementById('editGameId').value = "";
             document.getElementById('gameName').value = "";
             document.getElementById('gameCode').value = "";
             document.getElementById('imgPreview').style.display = 'none';
-            currentBase64 = "";
+            currentImg = "";
+            document.getElementById('modalTitle').innerText = "LANÇAR NOVO JOGO";
             openModal('uploadModal');
         };
 
@@ -136,54 +234,147 @@
             const id = document.getElementById('editGameId').value;
             const name = document.getElementById('gameName').value;
             const code = document.getElementById('gameCode').value;
+            const cat = document.getElementById('gameCategory').value;
             const author = localStorage.getItem('planetoid_user');
 
             if(name && code) {
-                const gameData = { 
-                    name, 
-                    logo: currentBase64 || "https://placehold.co/400x200/111/00ffcc?text=SEM+FOTO", 
-                    code, 
-                    author 
-                };
-                if(id) await set(ref(db, 'jogos/' + id), gameData);
-                else await push(ref(db, 'jogos'), gameData);
+                const gameData = { name, code, category: cat, logo: currentImg };
+                if(id) {
+                    await update(ref(db, 'jogos/' + id), gameData);
+                } else {
+                    gameData.author = author;
+                    gameData.likes = 0;
+                    await push(ref(db, 'jogos'), gameData);
+                }
                 closeModal('uploadModal');
             }
         };
 
         function loadGames() {
-            onValue(ref(db, 'jogos'), (snap) => {
-                const grid = document.getElementById('game-grid');
-                grid.innerHTML = "";
-                const currentU = localStorage.getItem('planetoid_user');
-                snap.forEach((childSnap) => {
-                    const g = childSnap.val();
-                    const id = childSnap.key;
-                    const isOwner = g.author === currentU;
-                    const card = document.createElement('div');
-                    card.className = 'game-card';
-                    card.innerHTML = `
-                        <img src="${g.logo}" class="game-banner">
-                        <div style="padding:15px; text-align:center">
-                            <h3>${g.name}</h3>
-                            <button class="btn" onclick="playGame('${btoa(unescape(encodeURIComponent(g.code)))}')">JOGAR</button>
-                            ${isOwner ? `<button class="btn" style="background:red" onclick="deleteGame('${id}')">X</button>` : ''}
-                        </div>
-                    `;
-                    grid.appendChild(card);
-                });
+            onValue(ref(db, 'jogos'), (s) => {
+                allGames = []; 
+                s.forEach(c => { allGames.push({id: c.key, ...c.val()}); });
+                renderGames(allGames);
             });
         }
 
-        window.deleteGame = (id) => { if(confirm("Apagar?")) remove(ref(db, 'jogos/' + id)); };
-        window.playGame = (encoded) => {
-            const code = decodeURIComponent(escape(atob(encoded)));
-            openModal('playerModal');
-            const d = document.getElementById('game-player').contentWindow.document;
-            d.open(); d.write(code); d.close();
+        function renderGames(data) {
+            const grid = document.getElementById('game-grid');
+            const currentUser = localStorage.getItem('planetoid_user');
+            grid.innerHTML = "";
+            data.reverse().forEach(g => {
+                const card = document.createElement('div');
+                card.className = 'game-card';
+                const canManage = (g.author === currentUser) || isAdmin();
+                const authorTag = g.author === 'planetofc' ? `🛡️ ${g.author} (ADMIN)` : `CMD: ${g.author}`;
+
+                card.innerHTML = `
+                    <div style="position:absolute; top:10px; right:10px; background:rgba(0,0,0,0.8); padding:5px; border-radius:5px; z-index:5">❤️ ${g.likes || 0}</div>
+                    <img src="${g.logo || ''}" class="game-banner" onerror="this.src='https://placehold.co/400x225/111/333?text=Planetoid'">
+                    <div class="card-body">
+                        <small style="color:var(--neon)">${g.category}</small>
+                        <h3 style="margin:5px 0">${g.name}</h3>
+                        <p style="font-size:0.7rem; color:#888; margin-bottom:15px">${authorTag}</p>
+                        <button class="btn" style="width:100%; margin-bottom:8px" onclick="playGame('${g.id}')">JOGAR</button>
+                        <div style="display:flex; gap:5px">
+                            <button class="btn" style="flex:1; background:transparent; border:1px solid var(--neon); font-size:0.7rem" onclick="likeGame('${g.id}')">CURTIR</button>
+                            ${canManage ? `
+                                <button class="btn" style="flex:1; background:#333; border:1px solid #555; font-size:0.7rem" onclick="editGame('${g.id}')">EDITAR</button>
+                                <button class="btn" style="background:#aa0000; border-color:#770000; font-size:0.7rem" onclick="deleteGame('${g.id}')">X</button>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        window.filterGames = () => {
+            const term = document.getElementById('searchBox').value.toLowerCase();
+            const filtered = allGames.filter(g => g.name.toLowerCase().includes(term) || g.author.toLowerCase().includes(term) || g.category.toLowerCase().includes(term));
+            renderGames(filtered);
         };
-        window.openModal = (id) => document.getElementById(id).style.display = "block";
-        window.closeModal = (id) => document.getElementById(id).style.display = "none";
+
+        window.editGame = async (id) => {
+            const snap = await get(ref(db, 'jogos/' + id));
+            const g = snap.val();
+            document.getElementById('editGameId').value = id;
+            document.getElementById('gameName').value = g.name;
+            document.getElementById('gameCategory').value = g.category;
+            document.getElementById('gameCode').value = g.code;
+            if(g.logo) {
+                currentImg = g.logo;
+                document.getElementById('imgPreview').src = g.logo;
+                document.getElementById('imgPreview').style.display = 'block';
+            }
+            document.getElementById('modalTitle').innerText = isAdmin() ? "MODERAÇÃO: EDITAR JOGO" : "EDITAR JOGO";
+            openModal('uploadModal');
+        };
+
+        window.deleteGame = (id) => { if(confirm("Deseja deletar este jogo da galáxia?")) remove(ref(db, 'jogos/' + id)); };
+        window.likeGame = (id) => { update(ref(db, 'jogos/' + id), { likes: increment(1) }); };
+
+        // --- COMENTÁRIOS E PLAYER ---
+        window.playGame = async (id) => {
+            activeGameId = id;
+            const snap = await get(ref(db, 'jogos/' + id));
+            const g = snap.val();
+            document.getElementById('playTitle').innerText = g.name;
+            openModal('playerModal');
+            const d = document.getElementById('player-frame').contentWindow.document;
+            d.open(); d.write(g.code); d.close();
+            
+            onValue(ref(db, 'comentarios/' + id), (s) => {
+                const list = document.getElementById('commentList');
+                list.innerHTML = "";
+                s.forEach(c => {
+                    const item = document.createElement('div');
+                    item.className = 'comment-item';
+                    item.innerHTML = `<b>${c.val().user}:</b> ${c.val().text}`;
+                    list.appendChild(item);
+                });
+            });
+        };
+
+        window.sendComment = () => {
+            const text = document.getElementById('newComment').value.trim();
+            if(!text) return;
+            push(ref(db, 'comentarios/' + activeGameId), { 
+                user: localStorage.getItem('planetoid_user'), 
+                text: text 
+            });
+            document.getElementById('newComment').value = "";
+        };
+
+        window.toggleFS = () => {
+            const f = document.getElementById('player-frame');
+            if(f.requestFullscreen) f.requestFullscreen();
+            else if(f.webkitRequestFullscreen) f.webkitRequestFullscreen();
+        };
+
+        // --- RANKING ---
+        window.openRank = () => {
+            const scores = {};
+            allGames.forEach(g => { scores[g.author] = (scores[g.author] || 0) + (g.likes || 0); });
+            const sorted = Object.entries(scores).sort((a,b) => b[1] - a[1]);
+            let html = "<table class='rank-table'>";
+            sorted.forEach((r, i) => {
+                const isTop = i === 0;
+                html += `<tr><td>${i+1}º</td><td class="${isTop?'rank-gold':''}">${r[0].toUpperCase()} ${isTop?'👑':''}</td><td>${r[1]} LIKES</td></tr>`;
+            });
+            document.getElementById('rankList').innerHTML = html + "</table>";
+        };
+
+        window.openModal = (id) => { 
+            if(id === 'rankModal') window.openRank(); 
+            document.getElementById(id).style.display = "block"; 
+        };
+        window.closeModal = (id) => {
+            document.getElementById(id).style.display = "none";
+            if(id === 'playerModal') document.getElementById('player-frame').src = "about:blank";
+        };
+
+        if(localStorage.getItem('planetoid_user')) loginSuccess(localStorage.getItem('planetoid_user'));
     </script>
 </body>
 </html>
