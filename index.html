@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Planetoid | Sistema de Contas</title>
+    <title>Planetoid</title>
     <link rel="manifest" href="manifest.json">
     <style>
         body {
@@ -16,76 +16,76 @@
         header { padding: 30px; text-align: center; }
         h1 { font-size: 3rem; color: #00ffcc; text-shadow: 3px 3px #b800ff; margin: 0; }
         
-        /* TELAS */
         #auth-screen { display: flex; flex-direction: column; gap: 15px; width: 300px; margin-top: 50px; }
         #main-hub { display: none; width: 100%; flex-direction: column; align-items: center; }
 
         .controls { margin-bottom: 40px; display: flex; gap: 10px; }
         .btn {
             background: #b800ff; color: white; border: 4px solid #7a00aa;
-            padding: 12px 20px; cursor: pointer; font-weight: bold; font-family: inherit;
+            padding: 10px 15px; cursor: pointer; font-weight: bold; font-family: inherit; margin: 2px;
         }
         .btn:hover { background: #00ffcc; color: #000; border-color: #00ccaa; }
         
-        #game-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; width: 90%; max-width: 1100px; }
-        .game-card { background: #111; border: 3px solid #333; padding: 20px; text-align: center; }
+        #game-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 25px; width: 90%; max-width: 1200px; padding: 20px; }
         
-        .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); }
-        .modal-content { background: #1a1a1a; margin: 5% auto; padding: 30px; border: 5px solid #00ffcc; width: 90%; max-width: 600px; }
+        .game-card { background: #111; border: 3px solid #333; overflow: hidden; position: relative; transition: 0.3s; }
+        .game-card:hover { border-color: #00ffcc; transform: translateY(-5px); }
+        .game-banner { width: 100%; height: 150px; object-fit: cover; background: #222; border-bottom: 3px solid #333; }
+        .game-content { padding: 15px; text-align: center; }
+        
+        .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); overflow-y: auto; }
+        .modal-content { background: #1a1a1a; margin: 2% auto; padding: 30px; border: 5px solid #00ffcc; width: 90%; max-width: 600px; }
         
         input, textarea { width: 100%; padding: 12px; background: #000; color: #00ffcc; border: 2px solid #333; font-family: monospace; margin-bottom: 10px; box-sizing: border-box; }
-        #game-player { width: 100%; height: 500px; border: 3px solid #333; background: #fff; }
-        
-        .user-info { margin-bottom: 20px; color: #00d4ff; font-weight: bold; }
+        #game-player { width: 100%; height: 550px; border: none; background: #fff; }
+        .owner-badge { position: absolute; top: 10px; right: 10px; background: #00ffcc; color: #000; padding: 2px 8px; font-size: 0.7rem; font-weight: bold; }
     </style>
 </head>
 <body>
 
-    <header>
-        <h1>PLANETOID</h1>
-    </header>
+    <header><h1>PLANETOID</h1></header>
 
     <div id="auth-screen">
         <h2 style="text-align: center; color: #b800ff;">IDENTIFIQUE-SE</h2>
         <input type="text" id="authUser" placeholder="Nome do Comandante">
         <input type="password" id="authPass" placeholder="Senha Estelar">
-        <button class="btn" onclick="handleAuth('login')">ENTRAR NA NAVE</button>
-        <button class="btn" style="background:#00d4ff; border-color:#008fb3; color:#000" onclick="handleAuth('signup')">CRIAR NOVA CONTA</button>
+        <button class="btn" onclick="handleAuth('login')">ENTRAR</button>
+        <button class="btn" style="background:#00d4ff; border-color:#008fb3; color:#000" onclick="handleAuth('signup')">CRIAR CONTA</button>
         <p id="authMsg" style="color: #ff4757; font-size: 0.8rem; text-align: center;"></p>
     </div>
 
     <div id="main-hub">
-        <div class="user-info">Bem-vindo, Comandante <span id="displayUser">...</span>!</div>
-        
+        <div style="margin-bottom:20px;">Comandante: <span id="displayUser" style="color:#00ffcc">...</span></div>
         <div class="controls">
-            <button class="btn" onclick="openModal('uploadModal')">[+] UPLOAD JOGO</button>
+            <button class="btn" onclick="prepareUpload()">[+] NOVO JOGO</button>
             <button class="btn" style="background:#ff4757" onclick="logout()">SAIR</button>
         </div>
-
         <div id="game-grid"></div>
     </div>
 
     <div id="uploadModal" class="modal">
         <div class="modal-content">
-            <h2 style="color:#00d4ff">LANÇAR JOGO</h2>
+            <h2 id="modalTitle" style="color:#00d4ff">LANÇAR JOGO</h2>
+            <input type="hidden" id="editGameId">
             <input type="text" id="gameName" placeholder="Nome do Jogo">
-            <textarea id="gameCode" placeholder="Cole o código HTML aqui..."></textarea>
-            <button class="btn" onclick="uploadGame()">ENVIAR PARA ÓRBITA</button>
-            <button class="btn" style="background:#444" onclick="closeModal('uploadModal')">VOLTAR</button>
+            <input type="text" id="gameLogo" placeholder="URL da Logo/Imagem (Ex: https://...)">
+            <textarea id="gameCode" placeholder="Código HTML do Jogo" rows="8"></textarea>
+            <button class="btn" id="saveBtn" onclick="saveGame()">CONFIRMAR LANÇAMENTO</button>
+            <button class="btn" style="background:#444" onclick="closeModal('uploadModal')">CANCELAR</button>
         </div>
     </div>
 
     <div id="playerModal" class="modal">
-        <div class="modal-content" style="max-width: 900px;">
-            <span style="cursor:pointer; color:red; float:right" onclick="closeModal('playerModal')">[X]</span>
-            <h2 id="currentPlayingTitle" style="color:#00ffcc; margin:0 0 10px 0;">...</h2>
+        <div class="modal-content" style="max-width: 95%; margin: 1% auto;">
+            <span style="cursor:pointer; color:red; float:right; font-weight:bold" onclick="closeModal('playerModal')">[FECHAR X]</span>
+            <h2 id="currentPlayingTitle" style="color:#00ffcc; margin:0 0 10px 0;"></h2>
             <iframe id="game-player"></iframe>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, push, onValue, get, child } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getDatabase, ref, push, set, onValue, get, child, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDeygtxefJrCt_nYA6MsoKG7bhj0Yzxgok",
@@ -98,101 +98,114 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
-        const usersRef = ref(db, 'usuarios');
-        const gamesRef = ref(db, 'jogos');
 
-        // --- SISTEMA DE AUTENTICAÇÃO ---
+        // --- AUTH ---
         window.handleAuth = async (type) => {
             const user = document.getElementById('authUser').value.trim().toLowerCase();
             const pass = document.getElementById('authPass').value;
             const msg = document.getElementById('authMsg');
+            if(!user || !pass) return;
 
-            if (!user || !pass) { msg.innerText = "Preencha todos os campos!"; return; }
-
-            const snapshot = await get(child(usersRef, user));
-            
-            if (type === 'signup') {
-                if (snapshot.exists()) {
-                    msg.innerText = "Erro: Nome de comandante já em uso!";
-                } else {
-                    await push(ref(db, 'usuarios/' + user), { password: pass });
-                    msg.style.color = "#00ffcc";
-                    msg.innerText = "Conta criada! Agora clique em ENTRAR.";
-                }
+            const snap = await get(child(ref(db), 'usuarios/' + user));
+            if(type === 'signup') {
+                if(snap.exists()) { msg.innerText = "Nome já existe!"; }
+                else { await set(ref(db, 'usuarios/' + user), { password: pass }); msg.innerText = "Criado! Entre agora."; }
             } else {
-                if (snapshot.exists()) {
-                    // O Firebase retorna um objeto com chaves aleatórias se usar push, 
-                    // para simplificar, vamos verificar o primeiro valor
-                    const userData = Object.values(snapshot.val())[0];
-                    if (userData.password === pass) {
-                        loginSuccess(user);
-                    } else {
-                        msg.innerText = "Senha incorreta!";
-                    }
-                } else {
-                    msg.innerText = "Comandante não encontrado!";
-                }
+                if(snap.exists() && snap.val().password === pass) loginSuccess(user);
+                else msg.innerText = "Dados incorretos!";
             }
         };
 
-        function loginSuccess(username) {
-            localStorage.setItem('planetoid_session', username);
+        function loginSuccess(u) {
+            localStorage.setItem('planetoid_user', u);
             document.getElementById('auth-screen').style.display = 'none';
             document.getElementById('main-hub').style.display = 'flex';
-            document.getElementById('displayUser').innerText = username.toUpperCase();
+            document.getElementById('displayUser').innerText = u;
             loadGames();
         }
 
-        window.logout = () => {
-            localStorage.removeItem('planetoid_session');
-            location.reload();
+        window.logout = () => { localStorage.removeItem('planetoid_user'); location.reload(); };
+        if(localStorage.getItem('planetoid_user')) loginSuccess(localStorage.getItem('planetoid_user'));
+
+        // --- GAMES ---
+        window.prepareUpload = () => {
+            document.getElementById('editGameId').value = "";
+            document.getElementById('gameName').value = "";
+            document.getElementById('gameLogo').value = "";
+            document.getElementById('gameCode').value = "";
+            document.getElementById('modalTitle').innerText = "LANÇAR NOVO JOGO";
+            openModal('uploadModal');
         };
 
-        // Verifica sessão ao carregar
-        const savedSession = localStorage.getItem('planetoid_session');
-        if (savedSession) loginSuccess(savedSession);
-
-        // --- SISTEMA DE JOGOS ---
-        window.uploadGame = async () => {
+        window.saveGame = async () => {
+            const id = document.getElementById('editGameId').value;
             const name = document.getElementById('gameName').value;
+            const logo = document.getElementById('gameLogo').value || "https://placehold.co/600x400/111/00ffcc?text=PLANETOID";
             const code = document.getElementById('gameCode').value;
-            const author = localStorage.getItem('planetoid_session');
+            const author = localStorage.getItem('planetoid_user');
 
             if(name && code) {
-                await push(gamesRef, { name, code, author, timestamp: Date.now() });
+                const gameData = { name, logo, code, author, timestamp: Date.now() };
+                if(id) { await set(ref(db, 'jogos/' + id), gameData); }
+                else { await push(ref(db, 'jogos'), gameData); }
                 closeModal('uploadModal');
             }
         };
 
         function loadGames() {
-            onValue(gamesRef, (snapshot) => {
+            onValue(ref(db, 'jogos'), (snap) => {
                 const grid = document.getElementById('game-grid');
                 grid.innerHTML = "";
-                const data = snapshot.val();
-                if(data) {
-                    Object.keys(data).reverse().forEach(key => {
-                        const game = data[key];
-                        const card = document.createElement('div');
-                        card.className = 'game-card';
-                        card.innerHTML = `
-                            <div style="font-size: 30px;">🎮</div>
-                            <h3>${game.name}</h3>
-                            <p style="font-size:0.7rem; color:#888">Por: ${game.author}</p>
-                            <button class="btn" onclick="playGame('${btoa(unescape(encodeURIComponent(game.code)))}', '${game.name}')">JOGAR</button>
-                        `;
-                        grid.appendChild(card);
-                    });
-                }
+                const currentU = localStorage.getItem('planetoid_user');
+                snap.forEach((childSnap) => {
+                    const g = childSnap.val();
+                    const id = childSnap.key;
+                    const isOwner = g.author === currentU;
+                    
+                    const card = document.createElement('div');
+                    card.className = 'game-card';
+                    card.innerHTML = `
+                        ${isOwner ? '<div class="owner-badge">MEU JOGO</div>' : ''}
+                        <img src="${g.logo}" class="game-banner" onerror="this.src='https://placehold.co/600x400/111/00ffcc?text=ERRO+IMG'">
+                        <div class="game-content">
+                            <h3>${g.name}</h3>
+                            <p style="font-size:0.7rem; color:#888; margin-bottom:15px">CMD: ${g.author}</p>
+                            <button class="btn" onclick="playGame('${btoa(unescape(encodeURIComponent(g.code)))}', '${g.name}')">JOGAR</button>
+                            ${isOwner ? `
+                                <button class="btn" style="background:#444" onclick="editGame('${id}')">EDITAR</button>
+                                <button class="btn" style="background:#aa0000; border-color:#770000" onclick="deleteGame('${id}')">X</button>
+                            ` : ''}
+                        </div>
+                    `;
+                    grid.appendChild(card);
+                });
             });
         }
 
-        window.playGame = (encodedCode, name) => {
-            const code = decodeURIComponent(escape(atob(encodedCode)));
-            const player = document.getElementById('game-player');
+        window.editGame = async (id) => {
+            const snap = await get(ref(db, 'jogos/' + id));
+            const g = snap.val();
+            document.getElementById('editGameId').value = id;
+            document.getElementById('gameName').value = g.name;
+            document.getElementById('gameLogo').value = g.logo;
+            document.getElementById('gameCode').value = g.code;
+            document.getElementById('modalTitle').innerText = "EDITAR JOGO";
+            openModal('uploadModal');
+        };
+
+        window.deleteGame = async (id) => {
+            if(confirm("Deseja deletar esse jogo da galáxia para sempre?")) {
+                await remove(ref(db, 'jogos/' + id));
+            }
+        };
+
+        window.playGame = (encoded, name) => {
+            const code = decodeURIComponent(escape(atob(encoded)));
+            const p = document.getElementById('game-player');
             document.getElementById('currentPlayingTitle').innerText = name;
             openModal('playerModal');
-            const doc = player.contentWindow.document;
-            doc.open(); doc.write(code); doc.close();
+            const d = p.contentWindow.document;
+            d.open(); d.write(code); d.close();
         };
 
         window.openModal = (id) => document.getElementById(id).style.display = "block";
