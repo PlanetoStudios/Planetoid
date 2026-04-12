@@ -3,31 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Planetoid | Engine 12.3</title>
+    <title>Planetoid | Engine 12.4</title>
     <style>
-        :root { --neon: #00ffcc; --purple: #b800ff; --bg: #050505; --card: #111; }
+        :root { --neon: #00ffcc; --purple: #b800ff; --bg: #050505; }
         body {
             margin: 0; background: var(--bg); color: #f0f0f0;
             font-family: 'Courier New', monospace; min-height: 100vh;
-            background-image: radial-gradient(1px 1px at 20px 30px, #333, rgba(0,0,0,0));
             display: flex; flex-direction: column; align-items: center;
         }
-        .btn { background: var(--purple); color: white; border: 3px solid #7a00aa; padding: 10px 15px; cursor: pointer; font-weight: bold; font-family: inherit; margin: 2px; transition: 0.2s; }
-        .btn:hover { background: var(--neon); color: #000; border-color: #00ccaa; box-shadow: 0 0 10px var(--neon); }
-        input, textarea, select { background: #000; color: var(--neon); border: 1px solid #333; padding: 10px; font-family: inherit; width: 100%; box-sizing: border-box; margin-bottom: 10px;}
-        #game-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; width: 95%; max-width: 1200px; padding: 20px; }
-        .game-card { background: var(--card); border: 2px solid #222; border-radius: 10px; overflow: hidden; text-align: center; padding-bottom: 15px;}
+        .btn { background: var(--purple); color: white; border: 3px solid #7a00aa; padding: 10px 15px; cursor: pointer; font-weight: bold; margin: 2px; }
+        .btn:hover { background: var(--neon); color: #000; border-color: #00ccaa; }
+        input, textarea { background: #000; color: var(--neon); border: 1px solid #333; padding: 10px; width: 100%; box-sizing: border-box; margin-bottom: 10px;}
+        #game-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; width: 95%; padding: 20px; }
+        .game-card { background: #111; border: 2px solid #222; border-radius: 10px; overflow: hidden; text-align: center; padding-bottom: 15px;}
         .game-banner { width: 100%; height: 150px; object-fit: cover; background: #222; }
-        .modal { display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); overflow-y: auto; }
-        .modal-content { background: #0a0a0a; margin: 1% auto; padding: 25px; border: 2px solid var(--neon); width: 90%; max-width: 900px; border-radius: 10px; }
-        iframe { width: 100%; height: 60vh; background: #fff; border: none; border-radius: 10px 10px 0 0; }
-        #debug-console { background: #000; color: #0f0; height: 100px; overflow-y: auto; font-size: 0.8rem; padding: 10px; border: 2px solid #333; text-align: left; }
+        .modal { display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.98); overflow-y: auto; }
+        .modal-content { background: #0a0a0a; margin: 1% auto; padding: 20px; border: 2px solid var(--neon); width: 95%; max-width: 900px; }
+        iframe { width: 100%; height: 70vh; background: #fff; border: none; }
+        #debug-console { background: #000; color: #0f0; height: 120px; overflow-y: auto; font-size: 0.8rem; padding: 10px; border: 2px solid #333; }
         .file-entry { background: #151515; padding: 10px; border-left: 4px solid var(--purple); margin-bottom: 10px; }
     </style>
 </head>
 <body>
 
-    <header><h1 style="color:var(--neon)">PLANETOID 12.3</h1></header>
+    <header><h1 style="color:var(--neon)">PLANETOID v12.4</h1></header>
 
     <div id="auth-screen" style="width:300px; margin-top: 50px;">
         <input type="text" id="authUser" placeholder="USUÁRIO">
@@ -38,7 +37,7 @@
 
     <div id="main-hub" style="display:none; width:100%; text-align:center;">
         <div style="padding:10px; background:rgba(255,255,255,0.05); margin-bottom:20px;">
-            <span id="myName">...</span> | <button class="btn" style="background:red; padding:2px 8px" onclick="logout()">X</button>
+            <span id="myName">...</span> | <button class="btn" onclick="logout()">SAIR</button>
         </div>
         <button class="btn" onclick="prepareUpload()">[+] NOVO PROJETO</button>
         <div id="game-grid"></div>
@@ -46,33 +45,33 @@
 
     <div id="uploadModal" class="modal">
         <div class="modal-content">
-            <h2 style="color:var(--neon)">LABORATÓRIO DE CÓDIGO</h2>
+            <h2 style="color:var(--neon)">CONSTRUTOR</h2>
             <div style="display:grid; grid-template-columns: 1.5fr 1fr; gap:20px;">
                 <div>
-                    <input type="text" id="gameName" placeholder="Título">
-                    <input type="file" accept="image/*" onchange="optimizeImg(this)">
-                    <img id="imgPreview" style="width:100%; height:80px; object-fit:cover; display:none; margin-bottom:10px">
+                    <input type="text" id="gameName" placeholder="Nome do Jogo">
+                    <input type="file" onchange="optimizeImg(this)">
+                    <img id="imgPreview" style="width:100%; height:80px; object-fit:cover; display:none;">
                     <div id="files-container"></div>
                     <button class="btn" style="background:#222" onclick="addFileField()">+ ARQUIVO</button>
                 </div>
-                <div style="background:#111; padding:10px; border-radius:5px">
-                    <h4 style="margin:0">MÍDIA (ASSETS)</h4>
+                <div style="background:#111; padding:10px;">
+                    <h4>ASSETS</h4>
                     <input type="file" onchange="uploadAsset()" id="assetInput">
-                    <div id="asset-list" style="font-size:0.7rem; margin-top:10px"></div>
+                    <div id="asset-list"></div>
                 </div>
             </div>
             <div style="margin-top:20px; text-align:right">
                 <input type="hidden" id="editGameId">
-                <button class="btn" id="saveBtn" onclick="saveGame()">ENVIAR PARA ÓRBITA</button>
-                <button class="btn" style="background:#444" onclick="closeModal('uploadModal')">FECHAR</button>
+                <button class="btn" onclick="saveGame()">GRAVAR PROJETO</button>
+                <button class="btn" style="background:#444" onclick="closeModal('uploadModal')">CANCELAR</button>
             </div>
         </div>
     </div>
 
     <div id="playerModal" class="modal">
-        <div class="modal-content" style="max-width:98%">
-            <button class="btn" style="float:right; background:red" onclick="closeModal('playerModal')">FECHAR</button>
-            <h2 id="playTitle" style="margin:0; text-align:left; color:var(--neon)"></h2>
+        <div class="modal-content">
+            <button class="btn" style="float:right; background:red" onclick="closeModal('playerModal')">X</button>
+            <h2 id="playTitle"></h2>
             <iframe id="player-frame"></iframe>
             <div id="debug-console"></div>
         </div>
@@ -105,7 +104,7 @@
             if(type === 'signup'){
                 await set(ref(db, 'usuarios/' + user), { password: pass }); loginSuccess(user);
             } else if(snap.exists() && snap.val().password === pass) loginSuccess(user);
-            else alert("Acesso negado.");
+            else alert("Acesso inválido.");
         };
 
         function loginSuccess(u){
@@ -117,9 +116,8 @@
         }
         window.logout = () => { localStorage.removeItem('planetoid_user'); location.reload(); };
 
-        // --- SISTEMA DE ARQUIVOS E IMAGENS ---
+        // --- ASSETS ---
         window.optimizeImg = (input) => {
-            const file = input.files[0];
             const reader = new FileReader();
             reader.onload = (e) => {
                 const img = new Image();
@@ -133,46 +131,36 @@
                 };
                 img.src = e.target.result;
             };
-            reader.readAsDataURL(file);
+            reader.readAsDataURL(input.files[0]);
         };
 
         window.uploadAsset = () => {
-            const file = document.getElementById('assetInput').files[0];
             const reader = new FileReader();
             reader.onload = (e) => {
                 const name = "ASSET_" + Math.floor(Math.random() * 9999);
                 window.tempAssets[name] = e.target.result;
                 renderAssetList();
             };
-            reader.readAsDataURL(file);
+            reader.readAsDataURL(document.getElementById('assetInput').files[0]);
         };
 
         function renderAssetList(){
             const list = document.getElementById('asset-list');
             list.innerHTML = "";
             for(let key in window.tempAssets) {
-                list.innerHTML += `<div style="background:#222; margin:2px; padding:3px; display:flex; justify-content:space-between"><span>${key}</span><button onclick="navigator.clipboard.writeText('window.${key}')">Copiar</button></div>`;
+                list.innerHTML += `<div style="background:#222; margin:2px; font-size:0.6rem;">${key} <button onclick="navigator.clipboard.writeText('window.${key}')">Copiar</button></div>`;
             }
         }
 
-        window.addFileField = (name = "script.js", content = "") => {
-            const div = document.createElement('div');
-            div.className = 'file-entry';
-            div.innerHTML = `<div style="display:flex; gap:5px; margin-bottom:5px"><input type="text" class="f-name" value="${name}" style="height:30px; margin:0"><button class="btn" style="background:#444; padding:0 10px" onclick="this.parentElement.parentElement.remove()">X</button></div><textarea rows="4" class="f-content">${content}</textarea>`;
-            document.getElementById('files-container').appendChild(div);
-        };
-
-        // --- SALVAR E CARREGAR HUB ---
+        // --- SALVAR E CARREGAR ---
         window.saveGame = async () => {
             const id = document.getElementById('editGameId').value;
             const name = document.getElementById('gameName').value.trim();
-            const author = localStorage.getItem('planetoid_user');
             const files = [];
             document.querySelectorAll('.file-entry').forEach(el => {
                 files.push({ name: el.querySelector('.f-name').value, content: el.querySelector('.f-content').value });
             });
-            if(!name || files.length === 0) return alert("Preencha o projeto!");
-            const gameData = { name, files, assets: window.tempAssets, logo: window.currentImg || "", author, lastUpdate: Date.now() };
+            const gameData = { name, files, assets: window.tempAssets, logo: window.currentImg, author: localStorage.getItem('planetoid_user'), lastUpdate: Date.now() };
             if(id) await update(ref(db, 'jogos/' + id), gameData);
             else await push(ref(db, 'jogos'), gameData);
             closeModal('uploadModal');
@@ -183,27 +171,27 @@
                 const grid = document.getElementById('game-grid'); grid.innerHTML = "";
                 s.forEach(c => {
                     const g = c.val();
-                    const key = c.key;
                     const canEdit = (g.author === localStorage.getItem('planetoid_user') || localStorage.getItem('planetoid_user') === 'planetofc');
-                    grid.innerHTML += `
-                        <div class="game-card">
-                            <img src="${g.logo || 'https://placehold.co/400x225/111/333?text=Planetoid'}" class="game-banner">
-                            <div style="padding:10px">
-                                <h3>${g.name}</h3>
-                                <button class="btn" style="width:100%" onclick="playGame('${key}')">JOGAR</button>
-                                ${canEdit ? `<button class="btn" style="background:#222; width:100%; font-size:0.7rem" onclick="editGame('${key}')">EDITAR</button>` : ''}
-                            </div>
+                    const card = document.createElement('div');
+                    card.className = 'game-card';
+                    card.innerHTML = `
+                        <img src="${g.logo || ''}" class="game-banner">
+                        <div style="padding:10px">
+                            <h3>${g.name}</h3>
+                            <button class="btn" style="width:100%" onclick="window.playGame('${c.key}')">JOGAR</button>
+                            ${canEdit ? `<button class="btn" style="background:#222; width:100%; font-size:0.7rem" onclick="window.editGame('${c.key}')">EDITAR</button>` : ''}
                         </div>`;
+                    grid.appendChild(card);
                 });
             });
         }
 
-        // --- MOTOR DE EXECUÇÃO (FIX TELA BRANCA) ---
+        // --- MOTOR DE BLOB (ULTRA CORREÇÃO) ---
         window.playGame = async (id) => {
             const s = await get(ref(db, 'jogos/' + id));
             const g = s.val();
             document.getElementById('playTitle').innerText = g.name;
-            document.getElementById('debug-console').innerHTML = "> Inicializando Kernel 12.3...";
+            document.getElementById('debug-console').innerHTML = "> Carregando Blob...";
             openModal('playerModal');
 
             let assetInjetor = "<script>";
@@ -221,31 +209,35 @@
                 else if(f.name.endsWith('.js')) js += `<script>${f.content}<\/script>`;
             });
 
-            // Fallback para garantir que o JS tenha onde atuar
-            if(!html.includes('<body')) html = "<body>" + html + "</body>";
-
-            const finalDoc = `<!DOCTYPE html><html><head><meta charset="UTF-8">${assetInjetor}${css}</head>${html}${js}</html>`;
+            const finalDoc = `<!DOCTYPE html><html><head><meta charset="UTF-8">${assetInjetor}${css}</head><body>${html}</body>${js}</html>`;
             
-            // O segredo: usar srcdoc em vez de document.write
-            const iframe = document.getElementById('player-frame');
-            iframe.srcdoc = finalDoc;
+            // Cria um arquivo virtual e gera uma URL para o iframe
+            const blob = new Blob([finalDoc], { type: 'text/html' });
+            const blobUrl = URL.createObjectURL(blob);
+            document.getElementById('player-frame').src = blobUrl;
         };
 
         window.addEventListener('message', (e) => {
             const con = document.getElementById('debug-console');
-            if(e.data.type === 'err') con.innerHTML += `<div style="color:#ff4d4d">> ERRO: ${e.data.msg}</div>`;
-            if(e.data.type === 'log') con.innerHTML += `<div style="color:#00ffcc">> LOG: ${e.data.msg}</div>`;
+            if(e.data.type === 'err') con.innerHTML += `<div style="color:red">> ${e.data.msg}</div>`;
+            if(e.data.type === 'log') con.innerHTML += `<div style="color:cyan">> ${e.data.msg}</div>`;
             con.scrollTop = con.scrollHeight;
         });
 
-        // --- FUNÇÕES DE MODAL ---
+        // --- FUNÇÕES EDITOR ---
+        window.addFileField = (name = "script.js", content = "") => {
+            const div = document.createElement('div');
+            div.className = 'file-entry';
+            div.innerHTML = `<input type="text" class="f-name" value="${name}" style="width:70%"><button onclick="this.parentElement.remove()">X</button><textarea rows="4" class="f-content">${content}</textarea>`;
+            document.getElementById('files-container').appendChild(div);
+        };
+
         window.editGame = async (id) => {
             const s = await get(ref(db, 'jogos/' + id));
             const g = s.val();
             document.getElementById('editGameId').value = id;
             document.getElementById('gameName').value = g.name;
             window.currentImg = g.logo || "";
-            if(g.logo) { document.getElementById('imgPreview').src = g.logo; document.getElementById('imgPreview').style.display = "block"; }
             window.tempAssets = g.assets || {};
             renderAssetList();
             document.getElementById('files-container').innerHTML = "";
@@ -255,20 +247,14 @@
 
         window.prepareUpload = () => {
             document.getElementById('editGameId').value = "";
-            document.getElementById('gameName').value = "";
-            document.getElementById('imgPreview').style.display = "none";
             document.getElementById('files-container').innerHTML = "";
             window.currentImg = ""; window.tempAssets = {};
-            renderAssetList();
-            addFileField("index.html", "<h1>Olá Mundo</h1>");
+            addFileField("index.html", "<h1>Hello Planetoid!</h1>");
             openModal('uploadModal');
         };
 
         window.openModal = (id) => document.getElementById(id).style.display = "block";
-        window.closeModal = (id) => { 
-            document.getElementById(id).style.display = "none";
-            if(id === 'playerModal') document.getElementById('player-frame').srcdoc = "";
-        };
+        window.closeModal = (id) => { document.getElementById(id).style.display = "none"; document.getElementById('player-frame').src = ""; };
 
         if(localStorage.getItem('planetoid_user')) loginSuccess(localStorage.getItem('planetoid_user'));
     </script>
