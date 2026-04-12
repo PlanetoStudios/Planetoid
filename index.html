@@ -3,149 +3,108 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Planetoid | Admin Update</title>
-    <link rel="manifest" href="manifest.json">
+    <title>Planetoid | Overdrive Engine</title>
     <style>
         :root { --neon: #00ffcc; --purple: #b800ff; --bg: #050505; --card: #111; }
         body {
             margin: 0; background: var(--bg); color: #f0f0f0;
             font-family: 'Courier New', monospace; min-height: 100vh;
-            background-image: radial-gradient(1px 1px at 20px 30px, #eee, rgba(0,0,0,0)), 
-                              radial-gradient(100px 150px at 50% 50%, #1a0033, #050505);
+            background-image: radial-gradient(1px 1px at 20px 30px, #333, rgba(0,0,0,0));
             display: flex; flex-direction: column; align-items: center;
         }
-        header { padding: 20px; text-align: center; }
-        h1 { font-size: 3.5rem; color: var(--neon); text-shadow: 4px 4px var(--purple); margin: 0; letter-spacing: 5px; }
-
-        /* NAVEGAÇÃO */
-        .nav-bar { width: 95%; max-width: 1200px; display: flex; justify-content: space-between; align-items: center; padding: 10px; background: rgba(255,255,255,0.05); border-radius: 10px; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
-        .user-pill { display: flex; align-items: center; gap: 10px; cursor: pointer; padding: 5px 15px; border: 1px solid var(--purple); border-radius: 20px; background: #000; }
-        .avatar-small { width: 30px; height: 30px; border-radius: 50%; object-fit: cover; background: #333; border: 1px solid var(--neon); }
-
-        #main-hub { display: none; width: 100%; flex-direction: column; align-items: center; }
         
-        .btn {
-            background: var(--purple); color: white; border: 3px solid #7a00aa;
-            padding: 10px 20px; cursor: pointer; font-weight: bold; font-family: inherit; transition: 0.2s;
-        }
-        .btn:hover { background: var(--neon); color: #000; border-color: #00ccaa; box-shadow: 0 0 15px var(--neon); }
+        /* INTERFACE */
+        .btn { background: var(--purple); color: white; border: 3px solid #7a00aa; padding: 10px 15px; cursor: pointer; font-weight: bold; font-family: inherit; margin: 2px; transition: 0.2s; }
+        .btn:hover { background: var(--neon); color: #000; border-color: #00ccaa; box-shadow: 0 0 10px var(--neon); }
+        input, textarea, select { background: #000; color: var(--neon); border: 1px solid #333; padding: 10px; font-family: inherit; width: 100%; box-sizing: border-box; }
 
-        /* GRID E CARDS */
-        #game-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 25px; width: 95%; max-width: 1200px; padding: 20px; }
-        .game-card { background: var(--card); border: 2px solid #333; position: relative; transition: 0.3s; border-radius: 8px; overflow: hidden; }
-        .game-banner { width: 100%; height: 180px; object-fit: cover; background: #222; }
-        .card-body { padding: 15px; }
+        /* GRID */
+        #game-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; width: 95%; max-width: 1200px; padding: 20px; }
+        .game-card { background: var(--card); border: 2px solid #222; border-radius: 10px; overflow: hidden; position: relative; }
+        .update-badge { position: absolute; top: 10px; left: 10px; background: gold; color: black; font-size: 0.6rem; padding: 2px 5px; font-weight: bold; border-radius: 3px; animation: blink 1s infinite; }
+        @keyframes blink { 50% { opacity: 0; } }
+
+        /* EDITOR E ASSETS */
+        .file-entry { background: #151515; padding: 15px; border-left: 5px solid var(--purple); margin-bottom: 15px; }
+        .asset-item { background: #222; padding: 5px; margin: 5px 0; font-size: 0.7rem; display: flex; justify-content: space-between; align-items: center; border: 1px dashed #444; }
         
-        /* COMENTÁRIOS */
-        .comment-section { margin-top: 20px; background: #000; padding: 15px; border: 1px solid #222; max-height: 200px; overflow-y: auto; text-align: left; }
-        .comment-item { font-size: 0.8rem; margin-bottom: 10px; border-bottom: 1px solid #111; padding-bottom: 5px; }
-        .comment-item b { color: var(--neon); }
+        /* DEBUG CONSOLE */
+        #debug-console { background: #000; color: #0f0; height: 100px; overflow-y: auto; font-size: 0.8rem; padding: 10px; border: 2px solid #333; margin-top: 10px; text-align: left; }
 
         /* MODAIS */
-        .modal { display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); overflow-y: auto; }
-        .modal-content { background: #0a0a0a; margin: 2% auto; padding: 30px; border: 3px solid var(--neon); width: 90%; max-width: 750px; position: relative; text-align: center; }
+        .modal { display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); overflow-y: auto; }
+        .modal-content { background: #0a0a0a; margin: 1% auto; padding: 25px; border: 2px solid var(--neon); width: 90%; max-width: 900px; }
         
-        input, textarea, select { width: 100%; padding: 12px; background: #000; color: var(--neon); border: 2px solid #333; margin-bottom: 15px; font-family: inherit; box-sizing: border-box; }
-        .preview-img { width: 100%; height: 180px; object-fit: cover; border: 1px solid var(--purple); margin-bottom: 10px; display: none; margin-left: auto; margin-right: auto; }
-
-        /* RANKING */
-        .rank-table { width: 100%; border-collapse: collapse; margin-top: 10px; text-align: left; }
-        .rank-table td { padding: 12px; border-bottom: 1px solid #222; }
-        .rank-gold { color: gold; font-weight: bold; text-shadow: 0 0 5px gold; }
+        iframe { width: 100%; height: 65vh; background: #fff; border: none; }
+        .tag-pill { background: #333; padding: 2px 8px; border-radius: 10px; font-size: 0.7rem; color: var(--neon); }
     </style>
 </head>
 <body>
 
-    <header><h1>PLANETOID</h1></header>
+    <header><h1>PLANETOID v12</h1></header>
 
-    <div id="auth-screen" style="width:320px; margin-top:40px;">
-        <h3 style="text-align:center; color:var(--purple)">SISTEMA DE ACESSO</h3>
+    <div id="auth-screen" style="width:300px; text-align:center;">
         <input type="text" id="authUser" placeholder="USUÁRIO">
         <input type="password" id="authPass" placeholder="SENHA">
-        <button class="btn" style="width:100%" onclick="handleAuth('login')">ACESSAR HUB</button>
-        <button class="btn" style="width:100%; background:#00d4ff; margin-top:10px; border-color:#008fb3" onclick="handleAuth('signup')">CRIAR CONTA</button>
-        <p id="authMsg" style="color:red; font-size:0.8rem; text-align:center"></p>
+        <button class="btn" style="width:100%" onclick="handleAuth('login')">INICIAR SESSÃO</button>
+        <button class="btn" style="width:100%; background:#444" onclick="handleAuth('signup')">RECRUTAR</button>
     </div>
 
-    <div id="main-hub">
-        <div class="nav-bar">
-            <div class="user-pill" onclick="openModal('profileModal')">
-                <img id="myAvatar" class="avatar-small" src="https://placehold.co/100/333/00ffcc?text=?">
-                <span id="myName">...</span>
-            </div>
-            <button class="btn" style="background:transparent; border:none; color:var(--neon)" onclick="openModal('rankModal')">🏆 RANKING</button>
-            <button class="btn" style="background:#ff4757; border-color:#aa0000" onclick="logout()">SAIR</button>
+    <div id="main-hub" style="display:none; width:100%; text-align:center;">
+        <div style="padding: 10px; background: #111; margin-bottom: 20px;">
+            <span id="myName">...</span> | 
+            <button class="btn" style="background:red" onclick="logout()">X</button>
         </div>
-
-        <div style="width:90%; max-width:600px; margin-bottom: 20px;">
-            <input type="text" id="searchBox" placeholder="Buscar jogos, categorias ou autores..." oninput="filterGames()" style="margin:0">
-        </div>
-
-        <button class="btn" onclick="prepareUpload()">[+] LANÇAR NOVO JOGO</button>
+        
+        <button class="btn" onclick="prepareUpload()">[+] CRIAR NOVO PROJETO</button>
         <div id="game-grid"></div>
     </div>
 
     <div id="uploadModal" class="modal">
         <div class="modal-content">
-            <h2 id="modalTitle" style="color:var(--neon)">NOVA MISSÃO</h2>
-            <input type="hidden" id="editGameId">
-            <input type="text" id="gameName" placeholder="Nome do Jogo">
-            <select id="gameCategory">
-                <option value="Ação">Ação</option>
-                <option value="Aventura">Aventura</option>
-                <option value="Clicker">Clicker</option>
-                <option value="Puzzle">Puzzle</option>
-                <option value="Estratégia">Estratégia</option>
-            </select>
-            <label style="font-size:0.7rem; color:#888; display:block; margin-bottom:5px;">CAPA DO JOGO (GALERIA):</label>
-            <input type="file" accept="image/*" onchange="optimizeImg(this, 'imgPreview')">
-            <img id="imgPreview" class="preview-img">
-            <textarea id="gameCode" placeholder="Cole o código HTML/JS do jogo aqui..." rows="8"></textarea>
-            <button class="btn" id="saveBtn" onclick="saveGame()">GRAVAR NOS SISTEMAS</button>
-            <button class="btn" style="background:#444; border-color:#222" onclick="closeModal('uploadModal')">CANCELAR</button>
-        </div>
-    </div>
+            <h2 style="color:var(--neon)">CONSTRUTOR DE GALÁXIAS</h2>
+            
+            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px;">
+                <div>
+                    <input type="text" id="gameName" placeholder="Título do Projeto">
+                    <select id="gameTag">
+                        <option value="Ação">Gênero: Ação</option>
+                        <option value="Terror">Gênero: Terror</option>
+                        <option value="Plataforma">Gênero: Plataforma</option>
+                        <option value="Clicker">Gênero: Clicker</option>
+                    </select>
+                    <div id="files-container" style="margin-top:15px"></div>
+                    <button class="btn" onclick="addFileField()">+ ARQUIVO</button>
+                </div>
 
-    <div id="profileModal" class="modal">
-        <div class="modal-content">
-            <h2 style="color:var(--purple)">MEU PERFIL</h2>
-            <input type="file" accept="image/*" onchange="optimizeImg(this, 'profilePreview')">
-            <img id="profilePreview" class="preview-img" style="display:block; width:120px; height:120px; border-radius:50%; margin: 10px auto;">
-            <button class="btn" onclick="saveProfile()">SALVAR AVATAR</button>
-            <button class="btn" style="background:#444" onclick="closeModal('profileModal')">FECHAR</button>
-        </div>
-    </div>
+                <div style="background:#111; padding:15px; border:1px solid #333;">
+                    <h4 style="margin:0; color:var(--purple)">BIBLIOTECA DE MÍDIA</h4>
+                    <p style="font-size:0.6rem; color:#888;">Imagens/Sons viram variáveis JS</p>
+                    <input type="file" id="assetInput" accept="image/*,audio/*" onchange="uploadAsset()" style="font-size:0.7rem">
+                    <div id="asset-list" style="margin-top:10px;"></div>
+                </div>
+            </div>
 
-    <div id="rankModal" class="modal">
-        <div class="modal-content">
-            <h2 style="color:gold">🏆 LÍDERES DA GALÁXIA</h2>
-            <div id="rankList"></div>
-            <button class="btn" style="margin-top:20px" onclick="closeModal('rankModal')">VOLTAR AO HUB</button>
+            <div style="margin-top:20px; border-top:1px solid #333; padding-top:15px;">
+                <input type="hidden" id="editGameId">
+                <button class="btn" id="saveBtn" onclick="saveGame()">PUBLICAR NA ÓRBITA</button>
+                <button class="btn" style="background:#444" onclick="closeModal('uploadModal')">FECHAR</button>
+            </div>
         </div>
     </div>
 
     <div id="playerModal" class="modal">
-        <div class="modal-content" style="max-width: 95%; width: 95%;">
-            <button class="btn" style="float:right; background:red; padding: 5px 12px;" onclick="closeModal('playerModal')">X</button>
-            <h2 id="playTitle" style="color:var(--neon); margin:0 0 10px 0; text-align: left;"></h2>
-            <button class="btn" style="font-size:0.7rem; padding:5px 10px; background:#333; margin-bottom:10px" onclick="toggleFS()">TELA CHEIA</button>
-            
+        <div class="modal-content" style="max-width:98%">
+            <button class="btn" style="float:right; background:red" onclick="closeModal('playerModal')">X</button>
+            <h2 id="playTitle" style="margin:0; text-align:left"></h2>
             <iframe id="player-frame"></iframe>
-            
-            <div class="comment-section">
-                <h4>💬 FEEDBACK DA TRIPULAÇÃO</h4>
-                <div id="commentList"></div>
-            </div>
-            <div style="display:flex; gap:10px; margin-top:10px;">
-                <input type="text" id="newComment" placeholder="Escreva um comentário..." style="margin:0">
-                <button class="btn" onclick="sendComment()">ENVIAR</button>
-            </div>
+            <div id="debug-console">Iniciando terminal de depuração...</div>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, push, set, onValue, get, child, remove, update, increment } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getDatabase, ref, push, set, onValue, get, child, remove, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDeygtxefJrCt_nYA6MsoKG7bhj0Yzxgok",
@@ -158,9 +117,7 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
-        let currentImg = "", currentProfileImg = "", activeGameId = "", allGames = [];
-
-        const isAdmin = () => localStorage.getItem('planetoid_user') === 'planetofc';
+        window.tempAssets = {}; // Guarda assets temporários do editor
 
         // --- AUTH ---
         window.handleAuth = async (type) => {
@@ -169,207 +126,164 @@
             if(!user || !pass) return;
             const snap = await get(child(ref(db), 'usuarios/' + user));
             if(type === 'signup'){
-                if(snap.exists()) alert("Nome já cadastrado!");
-                else { await set(ref(db, 'usuarios/' + user), { password: pass, avatar: "" }); loginSuccess(user); }
-            } else {
-                if(snap.exists() && snap.val().password === pass) loginSuccess(user);
-                else alert("Usuário ou senha incorretos!");
-            }
+                await set(ref(db, 'usuarios/' + user), { password: pass }); loginSuccess(user);
+            } else if(snap.exists() && snap.val().password === pass) loginSuccess(user);
+            else alert("Erro no acesso!");
         };
 
         function loginSuccess(u){
             localStorage.setItem('planetoid_user', u);
             document.getElementById('auth-screen').style.display = 'none';
             document.getElementById('main-hub').style.display = 'flex';
-            document.getElementById('myName').innerText = u.toUpperCase();
-            onValue(ref(db, 'usuarios/' + u), (s) => {
-                if(s.val()?.avatar) {
-                    document.getElementById('myAvatar').src = s.val().avatar;
-                    document.getElementById('profilePreview').src = s.val().avatar;
-                }
-            });
+            document.getElementById('myName').innerText = "CMD: " + u.toUpperCase();
             loadGames();
         }
         window.logout = () => { localStorage.removeItem('planetoid_user'); location.reload(); };
 
-        // --- IMAGENS ---
-        window.optimizeImg = (input, targetId) => {
-            const file = input.files[0];
-            if(!file) return;
+        // --- GESTÃO DE ASSETS (MÍDIA) ---
+        window.uploadAsset = () => {
+            const file = document.getElementById('assetInput').files[0];
             const reader = new FileReader();
             reader.onload = (e) => {
-                const img = new Image();
-                img.onload = () => {
-                    const canvas = document.createElement('canvas');
-                    const size = targetId === 'imgPreview' ? {w:400, h:225} : {w:120, h:120};
-                    canvas.width = size.w; canvas.height = size.h;
-                    canvas.getContext('2d').drawImage(img, 0, 0, size.w, size.h);
-                    const b64 = canvas.toDataURL('image/jpeg', 0.6);
-                    if(targetId === 'imgPreview') currentImg = b64; else currentProfileImg = b64;
-                    document.getElementById(targetId).src = b64; document.getElementById(targetId).style.display = 'block';
-                };
-                img.src = e.target.result;
+                const name = "ASSET_" + Math.floor(Math.random() * 999);
+                window.tempAssets[name] = e.target.result;
+                renderAssetList();
             };
             reader.readAsDataURL(file);
         };
 
-        window.saveProfile = () => {
-            update(ref(db, 'usuarios/' + localStorage.getItem('planetoid_user')), { avatar: currentProfileImg });
-            alert("Perfil atualizado!");
-            closeModal('profileModal');
-        };
+        function renderAssetList(){
+            const list = document.getElementById('asset-list');
+            list.innerHTML = "";
+            for(let key in window.tempAssets){
+                list.innerHTML += `<div class="asset-item">
+                    <span>${key}</span>
+                    <button class="btn" style="padding:2px; font-size:0.5rem" onclick="navigator.clipboard.writeText('window.${key}')">COPIAR VAR</button>
+                </div>`;
+            }
+        }
 
-        // --- CORE GAMES ---
-        window.prepareUpload = () => {
-            document.getElementById('editGameId').value = "";
-            document.getElementById('gameName').value = "";
-            document.getElementById('gameCode').value = "";
-            document.getElementById('imgPreview').style.display = 'none';
-            currentImg = "";
-            document.getElementById('modalTitle').innerText = "LANÇAR NOVO JOGO";
-            openModal('uploadModal');
+        // --- EDITOR ---
+        window.addFileField = (name = "script.js", content = "") => {
+            const container = document.getElementById('files-container');
+            const div = document.createElement('div');
+            div.className = 'file-entry';
+            div.innerHTML = `
+                <div style="display:flex; gap:5px; margin-bottom:5px">
+                    <input type="text" class="f-name" value="${name}" style="height:30px">
+                    <button class="btn" style="background:red; padding:0 10px" onclick="this.parentElement.parentElement.remove()">X</button>
+                </div>
+                <textarea rows="6" class="f-content">${content}</textarea>
+            `;
+            container.appendChild(div);
         };
 
         window.saveGame = async () => {
             const id = document.getElementById('editGameId').value;
-            const name = document.getElementById('gameName').value;
-            const code = document.getElementById('gameCode').value;
-            const cat = document.getElementById('gameCategory').value;
+            const name = document.getElementById('gameName').value.trim();
+            const tag = document.getElementById('gameTag').value;
             const author = localStorage.getItem('planetoid_user');
+            
+            const files = [];
+            document.querySelectorAll('.file-entry').forEach(el => {
+                files.push({ name: el.querySelector('.f-name').value, content: el.querySelector('.f-content').value });
+            });
 
-            if(name && code) {
-                const gameData = { name, code, category: cat, logo: currentImg };
-                if(id) {
-                    await update(ref(db, 'jogos/' + id), gameData);
-                } else {
-                    gameData.author = author;
-                    gameData.likes = 0;
-                    await push(ref(db, 'jogos'), gameData);
-                }
-                closeModal('uploadModal');
-            }
+            const gameData = { name, tag, files, assets: window.tempAssets, author, lastUpdate: Date.now() };
+
+            if(id) await update(ref(db, 'jogos/' + id), gameData);
+            else { gameData.likes = 0; await push(ref(db, 'jogos'), gameData); }
+            
+            closeModal('uploadModal');
         };
+
+        // --- PLAYER COM DEBUG ---
+        window.playGame = async (id) => {
+            const s = await get(ref(db, 'jogos/' + id));
+            const g = s.val();
+            document.getElementById('playTitle').innerText = g.name;
+            document.getElementById('debug-console').innerHTML = "> Inicializando sistema...";
+            openModal('playerModal');
+
+            // Injeta Assets no Window do iframe
+            let assetScript = "<script>";
+            if(g.assets) {
+                for(let key in g.assets) { assetScript += `window.${key} = "${g.assets[key]}";\n`; }
+            }
+            // Captura erros do console do iframe
+            assetScript += `
+                window.onerror = (m, u, l) => parent.postMessage({type:'err', msg: m + ' na linha ' + l}, '*');
+                console.log = (m) => parent.postMessage({type:'log', msg: m}, '*');
+                <\/script>
+            `;
+
+            let html = "", css = "", js = "";
+            g.files.forEach(f => {
+                if(f.name.endsWith('.html')) html += f.content;
+                else if(f.name.endsWith('.css')) css += `<style>${f.content}</style>`;
+                else if(f.name.endsWith('.js')) js += `<script>${f.content}<\/script>`;
+            });
+
+            const finalCode = assetScript + css + (html || "<body></body>") + js;
+            const d = document.getElementById('player-frame').contentWindow.document;
+            d.open(); d.write(finalCode); d.close();
+        };
+
+        // Escuta logs do iframe
+        window.addEventListener('message', (e) => {
+            const consoleEl = document.getElementById('debug-console');
+            if(e.data.type === 'err') consoleEl.innerHTML += `<div style="color:red">> ERRO: ${e.data.msg}</div>`;
+            if(e.data.type === 'log') consoleEl.innerHTML += `<div style="color:#0f0">> LOG: ${e.data.msg}</div>`;
+            consoleEl.scrollTop = consoleEl.scrollHeight;
+        });
 
         function loadGames() {
             onValue(ref(db, 'jogos'), (s) => {
-                allGames = []; 
-                s.forEach(c => { allGames.push({id: c.key, ...c.val()}); });
-                renderGames(allGames);
-            });
-        }
-
-        function renderGames(data) {
-            const grid = document.getElementById('game-grid');
-            const currentUser = localStorage.getItem('planetoid_user');
-            grid.innerHTML = "";
-            data.reverse().forEach(g => {
-                const card = document.createElement('div');
-                card.className = 'game-card';
-                const canManage = (g.author === currentUser) || isAdmin();
-                const authorTag = g.author === 'planetofc' ? `🛡️ ${g.author} (ADMIN)` : `CMD: ${g.author}`;
-
-                card.innerHTML = `
-                    <div style="position:absolute; top:10px; right:10px; background:rgba(0,0,0,0.8); padding:5px; border-radius:5px; z-index:5">❤️ ${g.likes || 0}</div>
-                    <img src="${g.logo || ''}" class="game-banner" onerror="this.src='https://placehold.co/400x225/111/333?text=Planetoid'">
-                    <div class="card-body">
-                        <small style="color:var(--neon)">${g.category}</small>
-                        <h3 style="margin:5px 0">${g.name}</h3>
-                        <p style="font-size:0.7rem; color:#888; margin-bottom:15px">${authorTag}</p>
-                        <button class="btn" style="width:100%; margin-bottom:8px" onclick="playGame('${g.id}')">JOGAR</button>
-                        <div style="display:flex; gap:5px">
-                            <button class="btn" style="flex:1; background:transparent; border:1px solid var(--neon); font-size:0.7rem" onclick="likeGame('${g.id}')">CURTIR</button>
-                            ${canManage ? `
-                                <button class="btn" style="flex:1; background:#333; border:1px solid #555; font-size:0.7rem" onclick="editGame('${g.id}')">EDITAR</button>
-                                <button class="btn" style="background:#aa0000; border-color:#770000; font-size:0.7rem" onclick="deleteGame('${g.id}')">X</button>
-                            ` : ''}
+                const grid = document.getElementById('game-grid'); grid.innerHTML = "";
+                s.forEach(c => {
+                    const g = c.val();
+                    const isNew = (Date.now() - g.lastUpdate) < 86400000; // Menos de 24h
+                    const card = document.createElement('div');
+                    card.className = 'game-card';
+                    card.innerHTML = `
+                        ${isNew ? '<div class="update-badge">NEW UPDATE</div>' : ''}
+                        <div style="padding:20px">
+                            <span class="tag-pill">${g.tag}</span>
+                            <h3>${g.name}</h3>
+                            <button class="btn" style="width:100%" onclick="playGame('${c.key}')">ABRIR</button>
+                            ${(g.author === localStorage.getItem('planetoid_user') || localStorage.getItem('planetoid_user') === 'planetofc') ? 
+                            `<button class="btn" style="background:#333; width:100%" onclick="editGame('${c.key}')">EDITAR</button>` : ''}
                         </div>
-                    </div>
-                `;
-                grid.appendChild(card);
+                    `;
+                    grid.appendChild(card);
+                });
             });
         }
-
-        window.filterGames = () => {
-            const term = document.getElementById('searchBox').value.toLowerCase();
-            const filtered = allGames.filter(g => g.name.toLowerCase().includes(term) || g.author.toLowerCase().includes(term) || g.category.toLowerCase().includes(term));
-            renderGames(filtered);
-        };
 
         window.editGame = async (id) => {
-            const snap = await get(ref(db, 'jogos/' + id));
-            const g = snap.val();
+            const s = await get(ref(db, 'jogos/' + id));
+            const g = s.val();
             document.getElementById('editGameId').value = id;
             document.getElementById('gameName').value = g.name;
-            document.getElementById('gameCategory').value = g.category;
-            document.getElementById('gameCode').value = g.code;
-            if(g.logo) {
-                currentImg = g.logo;
-                document.getElementById('imgPreview').src = g.logo;
-                document.getElementById('imgPreview').style.display = 'block';
-            }
-            document.getElementById('modalTitle').innerText = isAdmin() ? "MODERAÇÃO: EDITAR JOGO" : "EDITAR JOGO";
+            document.getElementById('gameTag').value = g.tag;
+            window.tempAssets = g.assets || {};
+            renderAssetList();
+            document.getElementById('files-container').innerHTML = "";
+            g.files.forEach(f => addFileField(f.name, f.content));
             openModal('uploadModal');
         };
 
-        window.deleteGame = (id) => { if(confirm("Deseja deletar este jogo da galáxia?")) remove(ref(db, 'jogos/' + id)); };
-        window.likeGame = (id) => { update(ref(db, 'jogos/' + id), { likes: increment(1) }); };
-
-        // --- COMENTÁRIOS E PLAYER ---
-        window.playGame = async (id) => {
-            activeGameId = id;
-            const snap = await get(ref(db, 'jogos/' + id));
-            const g = snap.val();
-            document.getElementById('playTitle').innerText = g.name;
-            openModal('playerModal');
-            const d = document.getElementById('player-frame').contentWindow.document;
-            d.open(); d.write(g.code); d.close();
-            
-            onValue(ref(db, 'comentarios/' + id), (s) => {
-                const list = document.getElementById('commentList');
-                list.innerHTML = "";
-                s.forEach(c => {
-                    const item = document.createElement('div');
-                    item.className = 'comment-item';
-                    item.innerHTML = `<b>${c.val().user}:</b> ${c.val().text}`;
-                    list.appendChild(item);
-                });
-            });
+        window.prepareUpload = () => {
+            document.getElementById('editGameId').value = "";
+            document.getElementById('files-container').innerHTML = "";
+            window.tempAssets = {};
+            renderAssetList();
+            addFileField("index.html", "<h1>Olá Mundo</h1>");
+            openModal('uploadModal');
         };
 
-        window.sendComment = () => {
-            const text = document.getElementById('newComment').value.trim();
-            if(!text) return;
-            push(ref(db, 'comentarios/' + activeGameId), { 
-                user: localStorage.getItem('planetoid_user'), 
-                text: text 
-            });
-            document.getElementById('newComment').value = "";
-        };
-
-        window.toggleFS = () => {
-            const f = document.getElementById('player-frame');
-            if(f.requestFullscreen) f.requestFullscreen();
-            else if(f.webkitRequestFullscreen) f.webkitRequestFullscreen();
-        };
-
-        // --- RANKING ---
-        window.openRank = () => {
-            const scores = {};
-            allGames.forEach(g => { scores[g.author] = (scores[g.author] || 0) + (g.likes || 0); });
-            const sorted = Object.entries(scores).sort((a,b) => b[1] - a[1]);
-            let html = "<table class='rank-table'>";
-            sorted.forEach((r, i) => {
-                const isTop = i === 0;
-                html += `<tr><td>${i+1}º</td><td class="${isTop?'rank-gold':''}">${r[0].toUpperCase()} ${isTop?'👑':''}</td><td>${r[1]} LIKES</td></tr>`;
-            });
-            document.getElementById('rankList').innerHTML = html + "</table>";
-        };
-
-        window.openModal = (id) => { 
-            if(id === 'rankModal') window.openRank(); 
-            document.getElementById(id).style.display = "block"; 
-        };
-        window.closeModal = (id) => {
+        window.openModal = (id) => document.getElementById(id).style.display = "block";
+        window.closeModal = (id) => { 
             document.getElementById(id).style.display = "none";
             if(id === 'playerModal') document.getElementById('player-frame').src = "about:blank";
         };
