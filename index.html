@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Planetoid | v12.9.4</title>
+    <title>Planetoid | v12.9.5</title>
 
-    <link rel="icon" type="image/png" href="https://i.imgur.com/nfcjTXC.png">
-    <link rel="apple-touch-icon" href="https://i.imgur.com/nfcjTXC.png">
+    <link rel="icon" type="image/jpeg" href="https://i.imgur.com/lq3tNk9.jpeg">
+    <link rel="apple-touch-icon" href="https://i.imgur.com/lq3tNk9.jpeg">
     
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -30,9 +30,9 @@
 <body>
 
     <div style="padding-top: 20px;">
-        <img src="https://i.imgur.com/nfcjTXC.png" alt="Planetoid Logo" style="height: 90px; filter: drop-shadow(0 0 10px var(--neon));">
-        <h1 style="color:var(--neon); margin-top: 10px;">PLANETOID ENGINE</h1>
-        <small style="color: #444;">v12.9.4 | Stable Build</small>
+        <img src="https://i.imgur.com/lq3tNk9.jpeg" alt="Planetoid Logo" style="height: 100px; border-radius: 10px; filter: drop-shadow(0 0 10px var(--neon));">
+        <h1 style="color:var(--neon); margin-top: 15px;">PLANETOID ENGINE</h1>
+        <small style="color: #444;">v12.9.5 | Identidade Corrigida</small>
     </div>
 
     <div id="auth-screen" style="width:300px; display:inline-block; margin-top: 30px;">
@@ -55,13 +55,13 @@
         <div class="modal-content">
             <h2 style="color:var(--neon)">ESTAÇÃO DE TRABALHO</h2>
             <input type="text" id="gameName" placeholder="Título do Jogo">
-            <input type="file" id="fileInput" onchange="optimizeImg(this)">
+            <input type="file" onchange="optimizeImg(this)">
             <img id="imgPreview" style="width:100%; height:100px; object-fit:cover; display:none; margin-top:10px;">
             <div id="files-container" style="margin-top:20px;"></div>
-            <button class="btn" onclick="addFileField()">+ ADICIONAR ARQUIVO</button>
+            <button class="btn" onclick="addFileField()">+ ARQUIVO</button>
             <div style="margin-top:20px; padding-top:15px; border-top: 1px solid #333;">
                 <input type="hidden" id="editGameId">
-                <button class="btn" onclick="saveGame()" style="background:green">SALVAR PROJETO</button>
+                <button class="btn" onclick="saveGame()" style="background:green">SALVAR</button>
                 <button class="btn" style="background:#444" onclick="closeModal('uploadModal')">VOLTAR</button>
             </div>
         </div>
@@ -92,7 +92,6 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // --- AUTH ---
         window.handleAuth = async (type) => {
             const user = document.getElementById('authUser').value.trim().toLowerCase();
             const pass = document.getElementById('authPass').value;
@@ -100,7 +99,7 @@
             const snap = await get(child(ref(db), 'usuarios/' + user));
             if(type === 'signup'){ await set(ref(db, 'usuarios/' + user), { password: pass }); loginSuccess(user); }
             else if(snap.exists() && snap.val().password === pass) loginSuccess(user);
-            else alert("Acesso Negado.");
+            else alert("Erro de acesso.");
         };
 
         function loginSuccess(u){
@@ -112,7 +111,6 @@
         }
         window.logout = () => { localStorage.removeItem('planetoid_user'); location.reload(); };
 
-        // --- CARREGAR JOGOS ---
         function loadGames() {
             onValue(ref(db, 'jogos'), (snapshot) => {
                 const grid = document.getElementById('game-grid');
@@ -138,7 +136,6 @@
             });
         }
 
-        // --- MOTOR ---
         window.playGame = async (id) => {
             const s = await get(ref(db, 'jogos/' + id));
             const g = s.val();
@@ -155,14 +152,13 @@
             const frame = document.getElementById('player-frame');
             const doc = frame.contentWindow.document;
             doc.open();
-            doc.write(`<!DOCTYPE html><html><head>${css}</head><body style="margin:0; background:#fff;">${html || '<h1>Planetoid Game</h1>'}</body></html>`);
+            doc.write(`<!DOCTYPE html><html><head>${css}</head><body style="margin:0; background:#fff;">${html || '<h1>Planetoid</h1>'}</body></html>`);
             const script = doc.createElement('script');
             script.text = `try { ${js} } catch(e) { console.error(e); }`;
             doc.body.appendChild(script);
             doc.close();
         };
 
-        // --- FUNÇÕES DE IMAGEM ---
         window.optimizeImg = (input) => {
             const file = input.files[0];
             const reader = new FileReader();
@@ -194,7 +190,7 @@
         };
 
         window.deleteGame = async (id) => {
-            if(confirm("Deseja deletar permanentemente?")) await remove(ref(db, 'jogos/' + id));
+            if(confirm("Deletar?")) await remove(ref(db, 'jogos/' + id));
         };
 
         window.saveGame = async () => {
@@ -226,7 +222,7 @@
             document.getElementById('files-container').innerHTML = "";
             window.currentImg = "";
             document.getElementById('imgPreview').style.display = 'none';
-            addFileField("index.html", "<h1>Olá Mundo</h1>");
+            addFileField("index.html", "<h1>Projeto</h1>");
             openModal('uploadModal');
         };
 
