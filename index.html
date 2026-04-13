@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Planetoid | v12.9.2</title>
+    <title>Planetoid | v12.9.3</title>
 
-    <link rel="icon" type="image/png" href="https://i.imgur.com/gm2rnR1.png">
-    <link rel="apple-touch-icon" href="https://i.imgur.com/gm2rnR1.png">
+    <link rel="icon" type="image/jpeg" href="https://i.imgur.com/lq3tNk9.jpeg">
+    <link rel="apple-touch-icon" href="https://i.imgur.com/lq3tNk9.jpeg">
     
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -30,9 +30,9 @@
 <body>
 
     <div style="padding-top: 20px;">
-        <img src="https://i.imgur.com/gm2rnR1.png" alt="Planetoid Logo" style="height: 80px; filter: drop-shadow(0 0 8px var(--neon));">
-        <h1 style="color:var(--neon); margin-top: 10px; text-shadow: 0 0 5px #000;">PLANETOID ENGINE</h1>
-        <small style="color: #555;">v12.9.2 | Estável</small>
+        <img src="https://i.imgur.com/lq3tNk9.jpeg" alt="Planetoid Logo" style="height: 100px; border-radius: 10px; filter: drop-shadow(0 0 10px var(--neon));">
+        <h1 style="color:var(--neon); margin-top: 15px; text-shadow: 0 0 5px #000;">PLANETOID ENGINE</h1>
+        <small style="color: #555;">v12.9.3 | Estável</small>
     </div>
 
     <div id="auth-screen" style="width:300px; display:inline-block; margin-top: 30px;">
@@ -80,6 +80,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getDatabase, ref, push, set, onValue, get, child, update, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
+        // CONFIGURAÇÃO DO FIREBASE (NÃO ALTERAR)
         const firebaseConfig = {
             apiKey: "AIzaSyDeygtxefJrCt_nYA6MsoKG7bhj0Yzxgok",
             authDomain: "planetoid-8.firebaseapp.com",
@@ -92,6 +93,7 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
+        // --- SISTEMA DE AUTENTICAÇÃO ---
         window.handleAuth = async (type) => {
             const user = document.getElementById('authUser').value.trim().toLowerCase();
             const pass = document.getElementById('authPass').value;
@@ -111,6 +113,7 @@
         }
         window.logout = () => { localStorage.removeItem('planetoid_user'); location.reload(); };
 
+        // --- CARREGAMENTO DO GRID DE JOGOS ---
         function loadGames() {
             onValue(ref(db, 'jogos'), (snapshot) => {
                 const grid = document.getElementById('game-grid');
@@ -122,7 +125,7 @@
                     const card = document.createElement('div');
                     card.className = 'game-card';
                     card.innerHTML = `
-                        <img src="${g.logo || ''}" class="game-banner" onerror="this.src='https://i.imgur.com/gm2rnR1.png'">
+                        <img src="${g.logo || ''}" class="game-banner" onerror="this.src='https://i.imgur.com/lq3tNk9.jpeg'">
                         <div style="padding:10px">
                             <h3 style="margin:5px 0;">${g.name}</h3>
                             <button class="btn" style="width:100%" onclick="window.playGame('${key}')">JOGAR</button>
@@ -136,6 +139,7 @@
             });
         }
 
+        // --- MOTOR DE EXECUÇÃO (PLAYER) ---
         window.playGame = async (id) => {
             const s = await get(ref(db, 'jogos/' + id));
             const g = s.val();
@@ -159,6 +163,7 @@
             doc.close();
         };
 
+        // --- SISTEMA DE ARQUIVOS E SALVAMENTO ---
         window.editGame = async (id) => {
             const s = await get(ref(db, 'jogos/' + id));
             const g = s.val();
