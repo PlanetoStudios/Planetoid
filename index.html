@@ -3,29 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Planetoid Studio | v17.5 Full</title>
+    <title>Planetoid Studio | v18.0</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 
     <style>
         :root { 
             --purple: #b800ff; --dark: #050505; --neon: #00ffcc;
-            --red: #ff3333; --gold: #ffd700; --gray: #f4f4f4;
+            --red: #ff3333; --gold: #ffd700;
         }
         
         body { 
-            margin: 0; background: #ffffff;
+            margin: 0; 
+            /* Fundo que você pediu */
+            background: #ffffff;
             background: linear-gradient(180deg, #ffffff 70%, #000000 100%);
-            background-attachment: fixed; color: #333; 
-            font-family: 'Segoe UI', sans-serif; text-align: center; min-height: 100vh;
+            background-attachment: fixed; 
+            color: #333; 
+            /* Fonte Undertale */
+            font-family: 'Press Start 2P', cursive; 
+            text-align: center; 
+            min-height: 100vh;
+            font-size: 10px; /* Fonte pixelada costuma ser grande, então diminuí um pouco a base */
+            line-height: 1.5;
         }
 
         /* --- UI & NAV --- */
-        .nav-bar { display: flex; justify-content: center; gap: 15px; background: rgba(255,255,255,0.9); padding: 15px; position: sticky; top: 0; z-index: 100; border-bottom: 2px solid var(--purple); backdrop-filter: blur(10px); }
-        .nav-item { cursor: pointer; font-weight: bold; color: #888; font-size: 0.75rem; text-transform: uppercase; padding: 5px 10px; }
-        .nav-item.active { color: var(--purple); border-bottom: 2px solid var(--purple); }
+        .nav-bar { 
+            display: flex; justify-content: center; gap: 15px; 
+            background: rgba(255, 255, 255, 0.4); 
+            padding: 15px; position: sticky; top: 0; z-index: 100; 
+            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            border-bottom: 2px solid rgba(184, 0, 255, 0.5);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+        }
+        .nav-item { cursor: pointer; color: #555; font-size: 10px; text-transform: uppercase; padding: 5px 10px; transition: 0.2s; }
+        .nav-item.active { color: var(--purple); border-bottom: 2px solid var(--purple); text-shadow: 0 0 5px rgba(184,0,255,0.5); }
 
-        .btn { background: var(--purple); color: white; border: none; padding: 10px 20px; cursor: pointer; border-radius: 8px; font-weight: bold; margin: 5px; transition: 0.2s; }
-        .btn:hover { transform: scale(1.05); filter: brightness(1.2); }
-        .btn-outline { background: transparent; border: 1px solid var(--purple); color: var(--purple); }
+        /* Botões com efeito de vidro e animação */
+        .btn { 
+            background: rgba(184, 0, 255, 0.2); 
+            backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+            border: 2px solid var(--purple);
+            color: #000; 
+            padding: 12px 20px; cursor: pointer; border-radius: 12px; 
+            font-family: 'Press Start 2P', cursive; font-size: 9px;
+            margin: 5px; 
+            transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+        .btn:hover { 
+            transform: scale(1.1); /* Animação de escalar */
+            background: var(--purple); 
+            color: white;
+            box-shadow: 0 8px 20px rgba(184,0,255,0.4);
+        }
+        .btn-outline { background: rgba(255,255,255,0.2); border: 2px solid #333; color: #333; }
+        .btn-outline:hover { background: #333; color: white; }
 
         /* --- GRIDS --- */
         .container { display: none; padding: 20px; animation: fadeIn 0.3s ease; }
@@ -33,31 +67,57 @@
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
         #game-grid, #asset-grid, #leaderboard { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; padding: 10px; }
-        .card { background: white; border-radius: 15px; border: 1px solid #ddd; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05); text-align: left; }
-        .game-banner { width: 100%; height: 140px; object-fit: cover; background: #eee; }
-
-        /* --- MODAIS --- */
-        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); overflow-y: auto; }
-        .modal-content { background: white; margin: 5% auto; padding: 25px; width: 90%; max-width: 650px; border-radius: 15px; border-top: 6px solid var(--purple); }
         
-        input, textarea, select { background: #f9f9f9; border: 1px solid #ddd; padding: 12px; width: 95%; margin-bottom: 10px; border-radius: 8px; font-family: inherit; }
-        .file-entry { background: #fdfdfd; padding: 10px; border: 1px solid #eee; margin-bottom: 10px; border-radius: 8px; }
+        /* Cards de Jogo com efeito de vidro e animação */
+        .card { 
+            background: rgba(255, 255, 255, 0.25); 
+            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            border: 2px solid rgba(255, 255, 255, 0.5); 
+            border-radius: 15px; overflow: hidden; 
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1); 
+            text-align: left;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .card:hover {
+            transform: scale(1.05); /* Animação de escalar */
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+            border-color: var(--purple);
+        }
+        .game-banner { width: 100%; height: 140px; object-fit: cover; background: rgba(0,0,0,0.1); }
+
+        /* --- MODAIS COM VIDRO --- */
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); overflow-y: auto; }
+        .modal-content { 
+            background: rgba(255, 255, 255, 0.85); 
+            backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            margin: 5% auto; padding: 25px; width: 90%; max-width: 650px; 
+            border-radius: 15px; border: 4px solid var(--purple); 
+            box-shadow: 0 10px 50px rgba(0,0,0,0.5);
+        }
+        
+        input, textarea, select { 
+            background: rgba(255,255,255,0.5); 
+            border: 2px solid #aaa; padding: 12px; width: 95%; 
+            margin-bottom: 10px; border-radius: 8px; 
+            font-family: 'Press Start 2P', cursive; font-size: 9px; 
+        }
+        .file-entry { background: rgba(255,255,255,0.4); padding: 10px; border: 2px solid #ddd; margin-bottom: 10px; border-radius: 8px; }
 
         /* --- STATS --- */
-        .stats-row { display: flex; justify-content: space-around; font-size: 11px; color: #777; padding: 10px; border-top: 1px solid #eee; }
+        .stats-row { display: flex; justify-content: space-around; font-size: 8px; color: #444; padding: 10px; border-top: 2px dashed rgba(0,0,0,0.1); margin-bottom: 10px; }
         .online-dot { width: 8px; height: 8px; background: #00ff00; border-radius: 50%; display: inline-block; box-shadow: 0 0 5px #00ff00; }
     </style>
 </head>
 <body>
 
     <div id="auth-screen" style="padding-top: 100px;">
-        <img src="https://i.imgur.com/lq3tNk9.jpeg" style="height: 100px; border-radius: 20px; margin-bottom: 20px;">
-        <h1 style="color:var(--purple)">PLANETOID STUDIO</h1>
-        <div style="max-width: 300px; margin: 0 auto;">
+        <img src="https://i.imgur.com/lq3tNk9.jpeg" style="height: 100px; border-radius: 20px; margin-bottom: 20px; border: 4px solid #000;">
+        <h1 style="color:var(--purple); font-size: 20px; text-shadow: 2px 2px 0px #000;">PLANETOID STUDIO</h1>
+        <div style="max-width: 300px; margin: 0 auto; background: rgba(255,255,255,0.3); padding: 20px; border-radius: 15px; backdrop-filter: blur(10px); border: 2px solid rgba(255,255,255,0.5);">
             <input type="text" id="user-input" placeholder="Usuário">
             <input type="password" id="pass-input" placeholder="Senha">
             <button class="btn" style="width:100%" onclick="handleAuth('login')">ENTRAR</button>
-            <button class="btn btn-outline" style="width:100%" onclick="handleAuth('register')">CRIAR CONTA NOVA</button>
+            <button class="btn btn-outline" style="width:100%; margin-top:10px;" onclick="handleAuth('register')">CRIAR CONTA NOVA</button>
         </div>
     </div>
 
@@ -69,8 +129,10 @@
         </div>
 
         <div id="hub" class="container active-container">
-            <button class="btn" onclick="prepareUpload()">[+] NOVO PROJETO</button>
-            <button class="btn btn-outline" onclick="openModal('groupModal')">ESTÚDIOS & CONVITES</button>
+            <div style="margin-bottom: 20px;">
+                <button class="btn" onclick="prepareUpload()">[+] NOVO PROJETO</button>
+                <button class="btn btn-outline" onclick="openModal('groupModal')">ESTÚDIOS & CONVITES</button>
+            </div>
             <div id="game-grid"></div>
         </div>
 
@@ -80,52 +142,52 @@
                 <button class="btn btn-outline" onclick="filterAssets('RPG')">RPG</button>
                 <button class="btn btn-outline" onclick="filterAssets('Clicker')">CLICKER</button>
                 <button class="btn btn-outline" onclick="filterAssets('Plataforma')">PLATAFORMA</button>
-                <button class="btn" style="background:var(--neon); color:#000" onclick="openModal('assetModal')">+ POSTAR SCRIPT</button>
+                <button class="btn" style="background:var(--neon); color:#000; border-color:#000;" onclick="openModal('assetModal')">+ POSTAR SCRIPT</button>
             </div>
             <div id="asset-grid"></div>
         </div>
 
         <div id="perfil" class="container">
-            <h2 style="color:var(--purple)">TOP DEVELOPERS</h2>
+            <h2 style="color:var(--purple); text-shadow: 2px 2px 0px #000; color: white;">TOP DEVELOPERS</h2>
             <div id="leaderboard"></div>
-            <button class="btn" style="background:var(--red); margin-top:50px" onclick="location.reload()">SAIR DA CONTA</button>
+            <button class="btn" style="background:var(--red); border-color:#000; color:#fff; margin-top:50px" onclick="location.reload()">SAIR DA CONTA</button>
         </div>
     </div>
 
     <div id="uploadModal" class="modal">
         <div class="modal-content">
-            <h3>EDITOR DE PROJETO</h3>
+            <h3 style="color: var(--purple);">EDITOR DE PROJETO</h3>
             <input type="hidden" id="edit-id">
             <input type="text" id="g-name" placeholder="Nome do Jogo">
             <div id="files-list"></div>
             <button class="btn btn-outline" onclick="addFileField()">+ ARQUIVO</button>
-            <hr>
+            <hr style="border: 1px dashed #aaa; margin: 20px 0;">
             <button class="btn" onclick="saveGame()">PUBLICAR NO HUB</button>
-            <button class="btn" style="background:#888" onclick="closeModal('uploadModal')">CANCELAR</button>
+            <button class="btn" style="background:#888; border-color:#555; color:#fff;" onclick="closeModal('uploadModal')">CANCELAR</button>
         </div>
     </div>
 
     <div id="groupModal" class="modal">
         <div class="modal-content">
-            <h3>MEUS ESTÚDIOS</h3>
+            <h3 style="color: var(--purple);">MEUS ESTÚDIOS</h3>
             <div id="my-groups-list" style="margin-bottom: 20px;"></div>
             <input type="text" id="new-group-name" placeholder="Nome do novo Estúdio">
             <button class="btn" onclick="createGroup()">CRIAR ESTÚDIO</button>
-            <hr>
-            <h4>CONVIDAR PLAYER</h4>
+            <hr style="border: 1px dashed #aaa; margin: 20px 0;">
+            <h4 style="color: var(--purple);">CONVIDAR PLAYER</h4>
             <select id="select-group-invite"></select>
             <input type="text" id="invite-user-target" placeholder="Nome do usuário">
             <button class="btn" onclick="sendInvite()">ENVIAR CONVITE</button>
-            <hr>
-            <h4>CONVITES PENDENTES</h4>
+            <hr style="border: 1px dashed #aaa; margin: 20px 0;">
+            <h4 style="color: var(--purple);">CONVITES PENDENTES</h4>
             <div id="pending-invites"></div>
-            <button class="btn" onclick="closeModal('groupModal')">FECHAR</button>
+            <button class="btn" style="margin-top: 15px;" onclick="closeModal('groupModal')">FECHAR</button>
         </div>
     </div>
 
     <div id="assetModal" class="modal">
         <div class="modal-content">
-            <h3>POSTAR SCRIPT</h3>
+            <h3 style="color: var(--purple);">POSTAR SCRIPT</h3>
             <input type="text" id="as-name" placeholder="Nome do Script">
             <select id="as-theme">
                 <option value="RPG">RPG</option>
@@ -141,14 +203,14 @@
 
     <div id="playerModal" class="modal">
         <div class="modal-content" style="max-width: 800px;">
-            <button class="btn" style="float:right; background:var(--red)" onclick="closeModal('playerModal')">X</button>
-            <h3 id="play-title"></h3>
-            <iframe id="game-engine" style="width:100%; height:60vh; border:1px solid #ddd; background:#fff; border-radius:10px;"></iframe>
+            <button class="btn" style="float:right; background:var(--red); color:#fff; border-color:#000;" onclick="closeModal('playerModal')">X</button>
+            <h3 id="play-title" style="color: var(--purple);"></h3>
+            <iframe id="game-engine" style="width:100%; height:50vh; border:4px solid #000; background:#fff; border-radius:10px;"></iframe>
             <div style="margin-top:15px">
                 <button class="btn btn-outline" onclick="likeGame()">❤️ CURTIR</button>
-                <div id="comment-section" style="margin-top:15px; background:#f9f9f9; padding:10px; border-radius:10px;">
-                    <div id="comments-list" style="max-height:100px; overflow-y:auto; margin-bottom:10px; font-size:12px;"></div>
-                    <input type="text" id="com-input" placeholder="Escreva um comentário..." style="width:70%; margin:0">
+                <div id="comment-section" style="margin-top:15px; background:rgba(0,0,0,0.05); padding:10px; border-radius:10px; border: 2px dashed #ccc;">
+                    <div id="comments-list" style="max-height:100px; overflow-y:auto; margin-bottom:10px; font-size:8px;"></div>
+                    <input type="text" id="com-input" placeholder="Comente algo..." style="width:65%; margin:0">
                     <button class="btn" onclick="postComment()">ENVIAR</button>
                 </div>
             </div>
@@ -198,7 +260,7 @@
         window.addFileField = (n = "index.html", c = "") => {
             const d = document.createElement('div');
             d.className = 'file-entry';
-            d.innerHTML = `<input type="text" class="f-n" value="${n}" style="width:40%"><button class="btn" style="background:red; padding:5px" onclick="this.parentElement.remove()">X</button><textarea class="f-c" style="height:80px; margin-top:5px">${c}</textarea>`;
+            d.innerHTML = `<input type="text" class="f-n" value="${n}" style="width:40%"><button class="btn" style="background:var(--red); color:#fff; padding:8px" onclick="this.parentElement.remove()">X</button><textarea class="f-c" style="height:80px; margin-top:5px">${c}</textarea>`;
             document.getElementById('files-list').appendChild(d);
         };
 
@@ -235,12 +297,12 @@
                         <div class="card">
                             <img src="https://i.imgur.com/nfcjTXC.png" class="game-banner">
                             <div style="padding:15px">
-                                <b>${g.name}</b><br><small>Por: ${g.author}</small>
+                                <b>${g.name}</b><br><span style="font-size:7px; color:#666;">DEV: ${g.author}</span>
                                 <div class="stats-row">
                                     <span>❤️ ${likes}</span> <span>👁️ ${g.views || 0}</span> <span><div class="online-dot"></div> ${ccu}</span>
                                 </div>
-                                <button class="btn" style="width:100%" onclick="playGame('${id}')">JOGAR</button>
-                                ${isOwner ? `<button class="btn btn-outline" style="width:100%" onclick="editGame('${id}')">EDITAR</button>` : ''}
+                                <button class="btn" style="width:100%; box-sizing: border-box;" onclick="playGame('${id}')">JOGAR</button>
+                                ${isOwner ? `<button class="btn btn-outline" style="width:100%; box-sizing: border-box; margin-top: 5px;" onclick="editGame('${id}')">EDITAR</button>` : ''}
                             </div>
                         </div>`;
                 });
@@ -303,7 +365,7 @@
                 list.innerHTML = ""; sel.innerHTML = "";
                 snap.forEach(c => {
                     if(c.val().membros && c.val().membros[user.toLowerCase()]) {
-                        list.innerHTML += `<div style="padding:5px">🚀 ${c.val().nome}</div>`;
+                        list.innerHTML += `<div style="padding:5px; border-bottom: 1px dashed #ccc;">👾 ${c.val().nome}</div>`;
                         sel.innerHTML += `<option value="${c.key}">${c.val().nome}</option>`;
                     }
                 });
@@ -312,7 +374,7 @@
                 const div = document.getElementById('pending-invites'); div.innerHTML = "";
                 snap.forEach(c => {
                     const inv = c.val();
-                    div.innerHTML += `<div style="font-size:12px; margin-top:5px">${inv.from} te convidou para <b>${inv.groupName}</b> <button class="btn" style="padding:2px 10px" onclick="acceptInvite('${inv.groupId}', '${c.key}')">OK</button></div>`;
+                    div.innerHTML += `<div style="font-size:8px; margin-top:5px; background:rgba(0,0,0,0.05); padding:10px; border-radius:8px;">${inv.from} te chamou pro grupo:<br><b>${inv.groupName}</b> <br><button class="btn" style="padding:5px 10px; margin-top:5px;" onclick="acceptInvite('${inv.groupId}', '${c.key}')">ACEITAR</button></div>`;
                 });
             });
         }
@@ -337,7 +399,7 @@
                 snap.forEach(c => {
                     const a = c.val();
                     if(theme === 'all' || a.theme === theme) {
-                        grid.innerHTML += `<div class="card" style="padding:15px"><small>${a.theme}</small><h4>${a.name}</h4><button class="btn btn-outline" onclick="navigator.clipboard.writeText(\`${a.code}\`); alert('Copiado!')">COPIAR</button></div>`;
+                        grid.innerHTML += `<div class="card" style="padding:15px"><span style="background:#eee; padding:3px; border-radius:5px; font-size:7px;">${a.theme}</span><br><br><b>${a.name}</b><br><button class="btn btn-outline" style="margin-top:10px;" onclick="navigator.clipboard.writeText(\`${a.code}\`); alert('Copiado pro clipboard!')">COPIAR</button></div>`;
                     }
                 });
             });
@@ -350,7 +412,7 @@
                 let players = []; snap.forEach(u => { players.push({ name: u.key, ...u.val() }); });
                 players.sort((a, b) => (b.xp || 0) - (a.xp || 0));
                 players.forEach((p, index) => {
-                    l.innerHTML += `<div class="card" style="padding:15px; border-left: 5px solid ${index==0?'gold':'#ddd'}">#${index+1} <b>${p.name}</b><br><small>Level ${p.level || 1} | XP ${p.xp || 0}</small></div>`;
+                    l.innerHTML += `<div class="card" style="padding:15px; border-left: 5px solid ${index==0?'var(--gold)':'#ddd'}">#${index+1} <b>${p.name}</b><br><br><span style="font-size:7px;">Nível ${p.level || 1} | XP ${p.xp || 0}</span></div>`;
                 });
             });
         }
@@ -366,7 +428,7 @@
         function loadComments(id) {
             onValue(ref(db, `jogos/${id}/comments`), (snap) => {
                 const div = document.getElementById('comments-list'); div.innerHTML = "";
-                snap.forEach(c => { div.innerHTML += `<div><b>${c.val().user}:</b> ${c.val().text}</div>`; });
+                snap.forEach(c => { div.innerHTML += `<div style="margin-bottom:5px;"><b>${c.val().user}:</b> ${c.val().text}</div>`; });
             });
         }
 
