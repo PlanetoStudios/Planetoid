@@ -3,9 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Planetoid Studio | v18.0</title>
+    <title>Planetoid Studio | v19.0 Full Engine</title>
 
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 
     <style>
         :root { 
@@ -14,206 +16,163 @@
         }
         
         body { 
-            margin: 0; 
-            /* Fundo que você pediu */
-            background: #ffffff;
+            margin: 0; background: #ffffff;
             background: linear-gradient(180deg, #ffffff 70%, #000000 100%);
-            background-attachment: fixed; 
-            color: #333; 
-            /* Fonte Undertale */
-            font-family: 'Press Start 2P', cursive; 
-            text-align: center; 
-            min-height: 100vh;
-            font-size: 10px; /* Fonte pixelada costuma ser grande, então diminuí um pouco a base */
-            line-height: 1.5;
+            background-attachment: fixed; color: #333; 
+            font-family: 'Press Start 2P', cursive; text-align: center; 
+            min-height: 100vh; font-size: 10px; line-height: 1.5;
         }
 
         /* --- UI & NAV --- */
         .nav-bar { 
-            display: flex; justify-content: center; gap: 15px; 
+            display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; 
             background: rgba(255, 255, 255, 0.4); 
             padding: 15px; position: sticky; top: 0; z-index: 100; 
             backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-            border-bottom: 2px solid rgba(184, 0, 255, 0.5);
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+            border-bottom: 2px solid var(--purple);
         }
-        .nav-item { cursor: pointer; color: #555; font-size: 10px; text-transform: uppercase; padding: 5px 10px; transition: 0.2s; }
+        .nav-item { cursor: pointer; color: #555; font-size: 9px; text-transform: uppercase; padding: 8px 12px; transition: 0.2s; }
         .nav-item.active { color: var(--purple); border-bottom: 2px solid var(--purple); text-shadow: 0 0 5px rgba(184,0,255,0.5); }
 
-        /* Botões com efeito de vidro e animação */
         .btn { 
             background: rgba(184, 0, 255, 0.2); 
             backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
-            border: 2px solid var(--purple);
-            color: #000; 
-            padding: 12px 20px; cursor: pointer; border-radius: 12px; 
-            font-family: 'Press Start 2P', cursive; font-size: 9px;
-            margin: 5px; 
-            transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease; 
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            border: 2px solid var(--purple); color: #000; 
+            padding: 10px 15px; cursor: pointer; border-radius: 12px; 
+            font-family: 'Press Start 2P', cursive; font-size: 8px; margin: 5px; 
+            transition: 0.2s ease;
         }
-        .btn:hover { 
-            transform: scale(1.1); /* Animação de escalar */
-            background: var(--purple); 
-            color: white;
-            box-shadow: 0 8px 20px rgba(184,0,255,0.4);
-        }
+        .btn:hover { transform: scale(1.05); background: var(--purple); color: white; }
         .btn-outline { background: rgba(255,255,255,0.2); border: 2px solid #333; color: #333; }
-        .btn-outline:hover { background: #333; color: white; }
+        .btn-delete { background: var(--red); color: white; border-color: #000; }
 
         /* --- GRIDS --- */
         .container { display: none; padding: 20px; animation: fadeIn 0.3s ease; }
         .active-container { display: block; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        #game-grid, #asset-grid, #leaderboard { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; padding: 10px; }
+        #game-grid, #asset-grid, #leaderboard, #destaque-grid { 
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; padding: 10px; 
+        }
         
-        /* Cards de Jogo com efeito de vidro e animação */
         .card { 
             background: rgba(255, 255, 255, 0.25); 
-            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-            border: 2px solid rgba(255, 255, 255, 0.5); 
-            border-radius: 15px; overflow: hidden; 
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1); 
-            text-align: left;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            backdrop-filter: blur(12px); border: 2px solid rgba(255, 255, 255, 0.5); 
+            border-radius: 15px; overflow: hidden; text-align: left; transition: 0.2s;
         }
-        .card:hover {
-            transform: scale(1.05); /* Animação de escalar */
-            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
-            border-color: var(--purple);
-        }
-        .game-banner { width: 100%; height: 140px; object-fit: cover; background: rgba(0,0,0,0.1); }
+        .card:hover { transform: translateY(-5px); border-color: var(--purple); }
+        .game-banner { width: 100%; height: 120px; object-fit: cover; background: #eee; }
 
-        /* --- MODAIS COM VIDRO --- */
-        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); overflow-y: auto; }
+        /* --- MODAIS --- */
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); overflow-y: auto; }
         .modal-content { 
-            background: rgba(255, 255, 255, 0.85); 
-            backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
-            margin: 5% auto; padding: 25px; width: 90%; max-width: 650px; 
+            background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(15px);
+            margin: 5% auto; padding: 25px; width: 90%; max-width: 700px; 
             border-radius: 15px; border: 4px solid var(--purple); 
-            box-shadow: 0 10px 50px rgba(0,0,0,0.5);
         }
         
         input, textarea, select { 
-            background: rgba(255,255,255,0.5); 
-            border: 2px solid #aaa; padding: 12px; width: 95%; 
-            margin-bottom: 10px; border-radius: 8px; 
-            font-family: 'Press Start 2P', cursive; font-size: 9px; 
+            background: rgba(255,255,255,0.6); border: 2px solid #aaa; padding: 10px; 
+            width: 90%; margin-bottom: 10px; border-radius: 8px; font-family: 'Press Start 2P'; font-size: 8px;
         }
-        .file-entry { background: rgba(255,255,255,0.4); padding: 10px; border: 2px solid #ddd; margin-bottom: 10px; border-radius: 8px; }
 
-        /* --- STATS --- */
-        .stats-row { display: flex; justify-content: space-around; font-size: 8px; color: #444; padding: 10px; border-top: 2px dashed rgba(0,0,0,0.1); margin-bottom: 10px; }
-        .online-dot { width: 8px; height: 8px; background: #00ff00; border-radius: 50%; display: inline-block; box-shadow: 0 0 5px #00ff00; }
+        .stats-row { display: flex; justify-content: space-around; font-size: 7px; color: #444; padding: 8px; border-top: 1px dashed #ccc; }
+        .online-dot { width: 8px; height: 8px; background: #00ff00; border-radius: 50%; display: inline-block; }
     </style>
 </head>
 <body>
 
-    <div id="auth-screen" style="padding-top: 100px;">
-        <img src="https://i.imgur.com/lq3tNk9.jpeg" style="height: 100px; border-radius: 20px; margin-bottom: 20px; border: 4px solid #000;">
-        <h1 style="color:var(--purple); font-size: 20px; text-shadow: 2px 2px 0px #000;">PLANETOID STUDIO</h1>
-        <div style="max-width: 300px; margin: 0 auto; background: rgba(255,255,255,0.3); padding: 20px; border-radius: 15px; backdrop-filter: blur(10px); border: 2px solid rgba(255,255,255,0.5);">
+    <div id="auth-screen" style="padding-top: 80px;">
+        <img src="https://i.imgur.com/lq3tNk9.jpeg" style="height: 80px; border-radius: 15px; border: 3px solid #000;">
+        <h1 style="color:var(--purple); font-size: 18px;">PLANETOID STUDIO</h1>
+        <div style="max-width: 300px; margin: 0 auto; background: rgba(255,255,255,0.3); padding: 20px; border-radius: 15px; border: 2px solid #fff;">
             <input type="text" id="user-input" placeholder="Usuário">
             <input type="password" id="pass-input" placeholder="Senha">
             <button class="btn" style="width:100%" onclick="handleAuth('login')">ENTRAR</button>
-            <button class="btn btn-outline" style="width:100%; margin-top:10px;" onclick="handleAuth('register')">CRIAR CONTA NOVA</button>
+            <button class="btn btn-outline" style="width:100%; margin-top:10px;" onclick="handleAuth('register')">CRIAR CONTA</button>
         </div>
     </div>
 
     <div id="main-hub" style="display:none">
         <div class="nav-bar">
             <div class="nav-item active" onclick="showTab('hub', this)">GAMES</div>
+            <div class="nav-item" onclick="showTab('destaques', this)">DESTAQUES</div>
             <div class="nav-item" onclick="showTab('assets', this)">SCRIPTS</div>
             <div class="nav-item" onclick="showTab('perfil', this)">RANKING</div>
         </div>
 
         <div id="hub" class="container active-container">
-            <div style="margin-bottom: 20px;">
-                <button class="btn" onclick="prepareUpload()">[+] NOVO PROJETO</button>
-                <button class="btn btn-outline" onclick="openModal('groupModal')">ESTÚDIOS & CONVITES</button>
-            </div>
+            <button class="btn" onclick="prepareUpload()">[+] NOVO PROJETO</button>
+            <button class="btn btn-outline" onclick="openModal('groupModal')">ESTÚDIOS</button>
             <div id="game-grid"></div>
         </div>
 
+        <div id="destaques" class="container">
+            <h2 style="color: var(--gold); text-shadow: 1px 1px 0 #000;">🏆 MAIS JOGADOS</h2>
+            <div id="destaque-grid"></div>
+        </div>
+
         <div id="assets" class="container">
-            <div style="margin-bottom: 20px;">
-                <button class="btn" onclick="filterAssets('all')">TUDO</button>
-                <button class="btn btn-outline" onclick="filterAssets('RPG')">RPG</button>
-                <button class="btn btn-outline" onclick="filterAssets('Clicker')">CLICKER</button>
-                <button class="btn btn-outline" onclick="filterAssets('Plataforma')">PLATAFORMA</button>
-                <button class="btn" style="background:var(--neon); color:#000; border-color:#000;" onclick="openModal('assetModal')">+ POSTAR SCRIPT</button>
-            </div>
+            <button class="btn" onclick="openModal('assetModal')">+ POSTAR SCRIPT</button>
             <div id="asset-grid"></div>
         </div>
 
         <div id="perfil" class="container">
-            <h2 style="color:var(--purple); text-shadow: 2px 2px 0px #000; color: white;">TOP DEVELOPERS</h2>
             <div id="leaderboard"></div>
-            <button class="btn" style="background:var(--red); border-color:#000; color:#fff; margin-top:50px" onclick="location.reload()">SAIR DA CONTA</button>
+            <button class="btn" style="background:var(--red); color:#fff; margin-top:40px" onclick="location.reload()">SAIR</button>
         </div>
     </div>
 
     <div id="uploadModal" class="modal">
         <div class="modal-content">
-            <h3 style="color: var(--purple);">EDITOR DE PROJETO</h3>
+            <h3>EDITOR DE PROJETO</h3>
             <input type="hidden" id="edit-id">
             <input type="text" id="g-name" placeholder="Nome do Jogo">
             <div id="files-list"></div>
             <button class="btn btn-outline" onclick="addFileField()">+ ARQUIVO</button>
-            <hr style="border: 1px dashed #aaa; margin: 20px 0;">
-            <button class="btn" onclick="saveGame()">PUBLICAR NO HUB</button>
-            <button class="btn" style="background:#888; border-color:#555; color:#fff;" onclick="closeModal('uploadModal')">CANCELAR</button>
+            <hr>
+            <button class="btn" onclick="saveGame()">PUBLICAR</button>
+            <button class="btn btn-outline" onclick="closeModal('uploadModal')">FECHAR</button>
+        </div>
+    </div>
+
+    <div id="playerModal" class="modal">
+        <div class="modal-content" style="max-width: 850px;">
+            <button class="btn" style="float:right;" onclick="closeModal('playerModal')">X</button>
+            <h3 id="play-title"></h3>
+            <iframe id="game-engine" sandbox="allow-scripts allow-same-origin" style="width:100%; height:450px; border:3px solid #000; background:#fff;"></iframe>
+            <div style="margin-top:10px;">
+                <button class="btn" onclick="likeGame()">❤️ CURTIR</button>
+                <div id="comments-list" style="max-height:80px; overflow-y:auto; font-size:8px; text-align:left; padding:10px;"></div>
+                <input type="text" id="com-input" placeholder="Comentar..." style="width:70%;">
+                <button class="btn" onclick="postComment()">OK</button>
+            </div>
         </div>
     </div>
 
     <div id="groupModal" class="modal">
         <div class="modal-content">
-            <h3 style="color: var(--purple);">MEUS ESTÚDIOS</h3>
-            <div id="my-groups-list" style="margin-bottom: 20px;"></div>
-            <input type="text" id="new-group-name" placeholder="Nome do novo Estúdio">
-            <button class="btn" onclick="createGroup()">CRIAR ESTÚDIO</button>
-            <hr style="border: 1px dashed #aaa; margin: 20px 0;">
-            <h4 style="color: var(--purple);">CONVIDAR PLAYER</h4>
+            <h3>ESTÚDIOS</h3>
+            <div id="my-groups-list"></div>
+            <input type="text" id="new-group-name" placeholder="Nome do Estúdio">
+            <button class="btn" onclick="createGroup()">CRIAR</button>
+            <hr>
+            <h4>CONVIDAR</h4>
             <select id="select-group-invite"></select>
-            <input type="text" id="invite-user-target" placeholder="Nome do usuário">
-            <button class="btn" onclick="sendInvite()">ENVIAR CONVITE</button>
-            <hr style="border: 1px dashed #aaa; margin: 20px 0;">
-            <h4 style="color: var(--purple);">CONVITES PENDENTES</h4>
+            <input type="text" id="invite-user-target" placeholder="Nome do Dev">
+            <button class="btn" onclick="sendInvite()">ENVIAR</button>
             <div id="pending-invites"></div>
-            <button class="btn" style="margin-top: 15px;" onclick="closeModal('groupModal')">FECHAR</button>
+            <button class="btn" onclick="closeModal('groupModal')">FECHAR</button>
         </div>
     </div>
 
     <div id="assetModal" class="modal">
         <div class="modal-content">
-            <h3 style="color: var(--purple);">POSTAR SCRIPT</h3>
-            <input type="text" id="as-name" placeholder="Nome do Script">
-            <select id="as-theme">
-                <option value="RPG">RPG</option>
-                <option value="Clicker">Clicker</option>
-                <option value="Plataforma">Plataforma</option>
-                <option value="Outro">Outro</option>
-            </select>
-            <textarea id="as-code" style="height:200px" placeholder="Cole o código aqui..."></textarea>
+            <h3>POSTAR SCRIPT</h3>
+            <input type="text" id="as-name" placeholder="Título">
+            <textarea id="as-code" style="height:150px" placeholder="Cole seu código aqui..."></textarea>
             <button class="btn" onclick="saveAsset()">POSTAR</button>
             <button class="btn btn-outline" onclick="closeModal('assetModal')">FECHAR</button>
-        </div>
-    </div>
-
-    <div id="playerModal" class="modal">
-        <div class="modal-content" style="max-width: 800px;">
-            <button class="btn" style="float:right; background:var(--red); color:#fff; border-color:#000;" onclick="closeModal('playerModal')">X</button>
-            <h3 id="play-title" style="color: var(--purple);"></h3>
-            <iframe id="game-engine" style="width:100%; height:50vh; border:4px solid #000; background:#fff; border-radius:10px;"></iframe>
-            <div style="margin-top:15px">
-                <button class="btn btn-outline" onclick="likeGame()">❤️ CURTIR</button>
-                <div id="comment-section" style="margin-top:15px; background:rgba(0,0,0,0.05); padding:10px; border-radius:10px; border: 2px dashed #ccc;">
-                    <div id="comments-list" style="max-height:100px; overflow-y:auto; margin-bottom:10px; font-size:8px;"></div>
-                    <input type="text" id="com-input" placeholder="Comente algo..." style="width:65%; margin:0">
-                    <button class="btn" onclick="postComment()">ENVIAR</button>
-                </div>
-            </div>
         </div>
     </div>
 
@@ -233,34 +192,45 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
         let user = "";
+        let userDisplay = "";
         let currentPlayingId = null;
 
-        // --- AUTH ---
+        // Proteção XSS
+        window.escapeHTML = (str) => {
+            if(!str) return "";
+            return String(str).replace(/[&<>'"]/g, tag => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[tag]));
+        };
+
+        // --- AUTH (SHA256 Fix para iPad) ---
         window.handleAuth = async (type) => {
-            const u = document.getElementById('user-input').value.trim();
-            const p = document.getElementById('pass-input').value.trim();
-            if(!u || !p) return alert("Preencha tudo!");
-            const uRef = ref(db, `users/${u}`);
+            const uRaw = document.getElementById('user-input').value.trim();
+            const p = document.getElementById('pass-input').value;
+            if(!uRaw || !p) return alert("Preencha tudo!");
+            
+            const uSafe = uRaw.toLowerCase();
+            const hashedP = CryptoJS.SHA256(p).toString();
+            const uRef = ref(db, `users/${uSafe}`);
             const snap = await get(uRef);
 
             if(type === 'register') {
-                if(snap.exists()) return alert("Usuário já existe!");
-                await set(uRef, { password: p, xp: 0, level: 1 });
-                alert("Conta criada!");
+                if(snap.exists()) return alert("Já existe!");
+                await set(uRef, { password: hashedP, xp: 0, level: 1, displayName: uRaw });
+                alert("Criado!");
             } else {
-                if(!snap.exists() || snap.val().password !== p) return alert("Erro no login!");
+                if(!snap.exists() || snap.val().password !== hashedP) return alert("Erro!");
             }
-            user = u;
+            
+            user = uSafe;
+            userDisplay = snap.exists() ? (snap.val().displayName || uRaw) : uRaw;
             document.getElementById('auth-screen').style.display = 'none';
             document.getElementById('main-hub').style.display = 'block';
             initHub();
         };
 
-        // --- GAMES & EDITOR ---
+        // --- GESTÃO DE JOGOS ---
         window.addFileField = (n = "index.html", c = "") => {
             const d = document.createElement('div');
-            d.className = 'file-entry';
-            d.innerHTML = `<input type="text" class="f-n" value="${n}" style="width:40%"><button class="btn" style="background:var(--red); color:#fff; padding:8px" onclick="this.parentElement.remove()">X</button><textarea class="f-c" style="height:80px; margin-top:5px">${c}</textarea>`;
+            d.innerHTML = `<input type="text" class="f-n" value="${escapeHTML(n)}" style="width:30%"><textarea class="f-c" style="height:60px">${escapeHTML(c)}</textarea><button onclick="this.parentElement.remove()">X</button>`;
             document.getElementById('files-list').appendChild(d);
         };
 
@@ -274,36 +244,62 @@
 
         window.saveGame = async () => {
             const id = document.getElementById('edit-id').value;
-            const name = document.getElementById('g-name').value;
+            const name = document.getElementById('g-name').value.trim();
             const files = [];
-            document.querySelectorAll('.file-entry').forEach(e => {
+            document.querySelectorAll('#files-list div').forEach(e => {
                 files.push({ name: e.querySelector('.f-n').value, content: e.querySelector('.f-c').value });
             });
-            const data = { name, files, author: user, updatedAt: Date.now() };
+            const data = { name, files, author: user, authorDisplay: userDisplay, updatedAt: Date.now() };
             if(id) await update(ref(db, `jogos/${id}`), data);
             else await push(ref(db, 'jogos'), data);
             closeModal('uploadModal');
         };
 
+        window.deleteGame = async (id) => {
+            if(confirm("Deseja deletar este jogo permanentemente?")) {
+                await remove(ref(db, `jogos/${id}`));
+                alert("Jogo removido.");
+            }
+        };
+
         function loadGames() {
             onValue(ref(db, 'jogos'), (snap) => {
-                const grid = document.getElementById('game-grid'); grid.innerHTML = "";
-                snap.forEach(c => {
-                    const id = c.key; const g = c.val();
-                    const isOwner = (g.author === user || user === "PlanetOfc");
+                const grid = document.getElementById('game-grid');
+                const destaqueGrid = document.getElementById('destaque-grid');
+                grid.innerHTML = ""; destaqueGrid.innerHTML = "";
+                
+                let lista = [];
+                snap.forEach(c => { lista.push({ id: c.key, ...c.val() }); });
+
+                // Lógica de Destaques (Top 5 mais vistos)
+                let destaques = [...lista].sort((a, b) => (b.views || 0) - (a.views || 0)).slice(0, 5);
+
+                lista.forEach(g => {
+                    const isOwner = (g.author === user || user === "planetofc");
                     const likes = g.likes ? Object.keys(g.likes).length : 0;
                     const ccu = g.ccu ? Object.keys(g.ccu).length : 0;
-                    grid.innerHTML += `
+                    
+                    const card = `
                         <div class="card">
                             <img src="https://i.imgur.com/nfcjTXC.png" class="game-banner">
-                            <div style="padding:15px">
-                                <b>${g.name}</b><br><span style="font-size:7px; color:#666;">DEV: ${g.author}</span>
-                                <div class="stats-row">
-                                    <span>❤️ ${likes}</span> <span>👁️ ${g.views || 0}</span> <span><div class="online-dot"></div> ${ccu}</span>
-                                </div>
-                                <button class="btn" style="width:100%; box-sizing: border-box;" onclick="playGame('${id}')">JOGAR</button>
-                                ${isOwner ? `<button class="btn btn-outline" style="width:100%; box-sizing: border-box; margin-top: 5px;" onclick="editGame('${id}')">EDITAR</button>` : ''}
+                            <div style="padding:10px">
+                                <b>${escapeHTML(g.name)}</b><br><small>Por: ${escapeHTML(g.authorDisplay)}</small>
+                                <div class="stats-row"><span>❤️ ${likes}</span> <span>👁️ ${g.views || 0}</span> <span>🌐 ${ccu}</span></div>
+                                <button class="btn" style="width:100%" onclick="playGame('${g.id}')">JOGAR</button>
+                                ${isOwner ? `
+                                    <button class="btn btn-outline" style="width:45%" onclick="editGame('${g.id}')">EDITAR</button>
+                                    <button class="btn btn-delete" style="width:45%" onclick="deleteGame('${g.id}')">APAGAR</button>
+                                ` : ''}
                             </div>
+                        </div>`;
+                    grid.innerHTML += card;
+                });
+
+                destaques.forEach(g => {
+                    destaqueGrid.innerHTML += `
+                        <div class="card" style="border: 2px solid var(--gold)">
+                            <div style="padding:15px"><b>🔥 ${escapeHTML(g.name)}</b><br><span>Visto ${g.views || 0} vezes</span>
+                            <button class="btn" style="width:100%; margin-top:10px" onclick="playGame('${g.id}')">JOGAR AGORA</button></div>
                         </div>`;
                 });
             });
@@ -341,78 +337,27 @@
             openModal('uploadModal');
         };
 
-        // --- ESTÚDIOS & INVITES ---
+        // --- ESTÚDIOS ---
         window.createGroup = async () => {
-            const n = document.getElementById('new-group-name').value;
-            if(!n) return;
-            await push(ref(db, 'grupos'), { nome: n, membros: { [user.toLowerCase()]: true } });
-            document.getElementById('new-group-name').value = "";
+            const n = document.getElementById('new-group-name').value.trim();
+            if(n) await push(ref(db, 'grupos'), { nome: n, membros: { [user]: true } });
         };
 
         window.sendInvite = async () => {
-            const target = document.getElementById('invite-user-target').value;
+            const target = document.getElementById('invite-user-target').value.trim().toLowerCase();
             const gid = document.getElementById('select-group-invite').value;
             const gname = document.getElementById('select-group-invite').selectedOptions[0].text;
-            if(!target || !gid) return;
-            await push(ref(db, `invites/${target}`), { from: user, groupId: gid, groupName: gname });
-            alert("Convite enviado!");
-        };
-
-        function loadGroupsAndInvites() {
-            onValue(ref(db, 'grupos'), (snap) => {
-                const list = document.getElementById('my-groups-list');
-                const sel = document.getElementById('select-group-invite');
-                list.innerHTML = ""; sel.innerHTML = "";
-                snap.forEach(c => {
-                    if(c.val().membros && c.val().membros[user.toLowerCase()]) {
-                        list.innerHTML += `<div style="padding:5px; border-bottom: 1px dashed #ccc;">👾 ${c.val().nome}</div>`;
-                        sel.innerHTML += `<option value="${c.key}">${c.val().nome}</option>`;
-                    }
-                });
-            });
-            onValue(ref(db, `invites/${user}`), (snap) => {
-                const div = document.getElementById('pending-invites'); div.innerHTML = "";
-                snap.forEach(c => {
-                    const inv = c.val();
-                    div.innerHTML += `<div style="font-size:8px; margin-top:5px; background:rgba(0,0,0,0.05); padding:10px; border-radius:8px;">${inv.from} te chamou pro grupo:<br><b>${inv.groupName}</b> <br><button class="btn" style="padding:5px 10px; margin-top:5px;" onclick="acceptInvite('${inv.groupId}', '${c.key}')">ACEITAR</button></div>`;
-                });
-            });
-        }
-
-        window.acceptInvite = async (gid, key) => {
-            await set(ref(db, `grupos/${gid}/membros/${user.toLowerCase()}`), true);
-            await remove(ref(db, `invites/${user}/${key}`));
-        };
-
-        // --- SCRIPTS ---
-        window.saveAsset = async () => {
-            const name = document.getElementById('as-name').value;
-            const theme = document.getElementById('as-theme').value;
-            const code = document.getElementById('as-code').value;
-            await push(ref(db, 'assets'), { name, theme, code, author: user });
-            closeModal('assetModal');
-        };
-
-        window.filterAssets = (theme) => {
-            onValue(ref(db, 'assets'), (snap) => {
-                const grid = document.getElementById('asset-grid'); grid.innerHTML = "";
-                snap.forEach(c => {
-                    const a = c.val();
-                    if(theme === 'all' || a.theme === theme) {
-                        grid.innerHTML += `<div class="card" style="padding:15px"><span style="background:#eee; padding:3px; border-radius:5px; font-size:7px;">${a.theme}</span><br><br><b>${a.name}</b><br><button class="btn btn-outline" style="margin-top:10px;" onclick="navigator.clipboard.writeText(\`${a.code}\`); alert('Copiado pro clipboard!')">COPIAR</button></div>`;
-                    }
-                });
-            });
+            await push(ref(db, `invites/${target}`), { from: userDisplay, groupId: gid, groupName: gname });
+            alert("Enviado!");
         };
 
         // --- RANKING ---
         function loadLeaderboard() {
             onValue(ref(db, 'users'), (snap) => {
-                const l = document.getElementById('leaderboard'); l.innerHTML = "";
-                let players = []; snap.forEach(u => { players.push({ name: u.key, ...u.val() }); });
-                players.sort((a, b) => (b.xp || 0) - (a.xp || 0));
-                players.forEach((p, index) => {
-                    l.innerHTML += `<div class="card" style="padding:15px; border-left: 5px solid ${index==0?'var(--gold)':'#ddd'}">#${index+1} <b>${p.name}</b><br><br><span style="font-size:7px;">Nível ${p.level || 1} | XP ${p.xp || 0}</span></div>`;
+                const l = document.getElementById('leaderboard'); l.innerHTML = "<h2>TOP DEVS</h2>";
+                let ps = []; snap.forEach(u => { ps.push({ name: u.val().displayName || u.key, ...u.val() }); });
+                ps.sort((a, b) => (b.xp || 0) - (a.xp || 0)).forEach((p, i) => {
+                    l.innerHTML += `<div class="card" style="padding:10px">#${i+1} ${escapeHTML(p.name)} - LVL ${p.level}</div>`;
                 });
             });
         }
@@ -420,19 +365,18 @@
         // --- SOCIAL ---
         window.likeGame = () => set(ref(db, `jogos/${currentPlayingId}/likes/${user}`), true);
         window.postComment = () => {
-            const txt = document.getElementById('com-input').value;
-            if(!txt) return;
-            push(ref(db, `jogos/${currentPlayingId}/comments`), { user, text: txt });
+            const t = document.getElementById('com-input').value.trim();
+            if(t) push(ref(db, `jogos/${currentPlayingId}/comments`), { user: userDisplay, text: t });
             document.getElementById('com-input').value = "";
         };
         function loadComments(id) {
             onValue(ref(db, `jogos/${id}/comments`), (snap) => {
-                const div = document.getElementById('comments-list'); div.innerHTML = "";
-                snap.forEach(c => { div.innerHTML += `<div style="margin-bottom:5px;"><b>${c.val().user}:</b> ${c.val().text}</div>`; });
+                const d = document.getElementById('comments-list'); d.innerHTML = "";
+                snap.forEach(c => { d.innerHTML += `<div><b>${escapeHTML(c.val().user)}:</b> ${escapeHTML(c.val().text)}</div>`; });
             });
         }
 
-        // --- UI BASE ---
+        // --- AUXILIARES UI ---
         window.showTab = (id, el) => {
             document.querySelectorAll('.container').forEach(c => c.classList.remove('active-container'));
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
@@ -441,18 +385,14 @@
             if(id === 'perfil') loadLeaderboard();
         };
         window.openModal = (id) => document.getElementById(id).style.display = "block";
-        window.closeModal = (id) => {
-            document.getElementById(id).style.display = "none";
-            if(id === 'playerModal' && currentPlayingId) {
-                remove(ref(db, `jogos/${currentPlayingId}/ccu/${user}`));
-                currentPlayingId = null;
-            }
-        };
+        window.closeModal = (id) => document.getElementById(id).style.display = "none";
 
         function initHub() {
             loadGames();
-            loadGroupsAndInvites();
-            window.filterAssets('all');
+            onValue(ref(db, 'grupos'), (snap) => {
+                const sel = document.getElementById('select-group-invite'); sel.innerHTML = "";
+                snap.forEach(c => { if(c.val().membros[user]) sel.innerHTML += `<option value="${c.key}">${c.val().nome}</option>`; });
+            });
         }
     </script>
 </body>
